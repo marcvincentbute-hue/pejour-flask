@@ -12,7 +12,7 @@ from psycopg.types.json import Jsonb
 from psycopg.errors import UniqueViolation
 from .db import execute, one, all_rows, connection, lock
 from .security import now, PHT, audit, hash_secret, verify, encrypt, decrypt, rotate_session, captcha_valid
-from .validation import QUESTIONS, GOALS, MOODS, registration_errors, selected_questions, username_valid, answer_valid, strength, today, date_value, age
+from .validation import QUESTIONS, GOALS, MOODS, journal_profile_errors, registration_errors, selected_questions, username_valid, answer_valid, strength, today, date_value, age
 from .settings import IDLE_SECONDS, FORGOT_AFTER
 from .auth import account, guard, fail, captcha_failure, send_otp, check_otp, finish_login, change_password
 from .mail import DeliveryError
@@ -456,14 +456,99 @@ def account_page():
         intention=decrypt(g.user['intention'], g.user['id'] + ':intention')
     )
 
-@bp.route('/my-account')
+@bp.route('/my-account', methods=['GET', 'POST'])
 @protected()
 def my_account():
-    return render_template('my_account.html', title='My account')
+    user = g.user
+    data = dict(user['profile'], username=user['username'])
+    errors = {}
+    if request.method == 'POST':
+        data = request.form
+        errors = journal_profile_errors(data)
+        username = data.get('username', '')
+        if not username_valid(username):
+            errors['username'] = 'Use 6–20 letters and digits, starting with a letter.'
+        elif username != user['username'] and not verify(user['password_hash'], data.get('password', '')):
+            errors['password'] = 'Enter your current password to change your username.'
+        earliest = one('SELECT min(entry_date) AS first FROM journal_entries WHERE user_id=%s', (user['id'],))['first']
+        if earliest and not errors.get('journal_start') and date_value(data['journal_start']) > earliest:
+            errors['journal_start'] = 'Choose a date on or before your earliest entry.'
+        if not errors:
+            changes = {key: data[key] for key in ('display_name', 'writing_goal', 'journal_start')}
+            try:
+                with connection().transaction():
+                    execute('UPDATE users SET username=%s, profile=profile || %s WHERE id=%s',
+                            (username, Jsonb(changes), user['id']))
+            except UniqueViolation:
+                errors['username'] = 'That username is unavailable.'
+            else:
+                audit('PROFILE_UPDATED', username, user['id'])
+                g.session['notice'] = 'Your profile has been saved.'
+                return redirect(url_for('web.my_account'))
+    return render_template('my_account.html', title='My account', data=data, errors=errors)
 
-@bp.route('/settings')
+
+@bp.post('/my-account/email')
+@protected()
+def account_email():
+    user = g.user
+    uid = user['id']
+    lock('otp:' + uid + ':email_change')
+    pending = g.session.get('email_change', {})
+    if request.form.get('action') == 'confirm':
+        latest = one('SELECT id FROM otps WHERE user_id=%s AND purpose=%s ORDER BY id DESC LIMIT 1',
+                     (uid, 'email_change'))
+        if not pending or not latest or pending['otp_id'] != latest['id']:
+            message = 'Request a new email verification code.'
+        elif not check_otp(user, 'email_change', request.form.get('code', '')):
+            message = 'The code is invalid or expired.'
+        else:
+            try:
+                with connection().transaction():
+                    updated = one('UPDATE users SET email=%s, version=version+1 WHERE id=%s AND version=%s RETURNING version',
+                                  (pending['email'], uid, user['version']))
+            except UniqueViolation:
+                message = 'That email is unavailable.'
+            else:
+                if updated:
+                    rotate_session({'auth': dict(g.session['auth'], version=updated['version'])})
+                    audit('ACCOUNT_EMAIL_UPDATED', user['username'], uid)
+                    message = 'Your new email is verified and saved.'
+                else:
+                    message = 'Your account changed. Sign in again.'
+            g.session.pop('email_change', None)
+    else:
+        email = request.form.get('email', '').strip().lower()
+        if not verify(user['password_hash'], request.form.get('password', '')):
+            message = 'Enter your current password to change your email.'
+        elif len(email) > 100 or not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+', email):
+            message = 'Enter a valid email address.'
+        elif email == user['email'].lower():
+            message = 'Enter a different email address.'
+        else:
+            try:
+                message = send_otp(dict(user, email=email), 'email_change', resend=bool(pending))
+            except DeliveryError as error:
+                message = str(error)
+            if not message:
+                latest = one('SELECT id FROM otps WHERE user_id=%s AND purpose=%s ORDER BY id DESC LIMIT 1',
+                             (uid, 'email_change'))
+                g.session['email_change'] = {'email': email, 'otp_id': latest['id']}
+                message = 'Verification code sent to your new email.'
+    g.session['notice'] = message
+    return redirect(url_for('web.my_account'))
+
+
+@bp.route('/settings', methods=['GET', 'POST'])
 @protected()
 def settings_page():
+    if request.method == 'POST':
+        theme = request.form.get('theme')
+        if theme not in ('dark', 'light'):
+            abort(400)
+        execute('UPDATE users SET profile=profile || %s WHERE id=%s', (Jsonb({'theme': theme}), g.user['id']))
+        g.session['notice'] = 'Appearance saved.'
+        return redirect(url_for('web.settings_page'))
     return render_template('settings.html', title='Settings')
 
 @bp.route('/journal')

@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS password_history (
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE TABLE IF NOT EXISTS otps (
- id bigserial PRIMARY KEY, user_id varchar(9) REFERENCES users(id), purpose text NOT NULL CHECK(purpose IN ('register','login','reset')),
+ id bigserial PRIMARY KEY, user_id varchar(9) REFERENCES users(id), purpose text NOT NULL CHECK(purpose IN ('register','login','reset','email_change')),
  code_hash text NOT NULL, expires_at timestamptz NOT NULL, attempts integer NOT NULL DEFAULT 0,
  used boolean NOT NULL DEFAULT false, is_resend boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now()
 );
@@ -40,8 +40,12 @@ CREATE TABLE IF NOT EXISTS security_flags (
 CREATE TABLE IF NOT EXISTS journal_entries (
  id bigserial PRIMARY KEY, user_id varchar(9) NOT NULL REFERENCES users(id), title text NOT NULL, body text NOT NULL,
  entry_date date NOT NULL, mood text NOT NULL, version integer NOT NULL DEFAULT 1,
+ word_count integer NOT NULL DEFAULT 0, is_pinned boolean NOT NULL DEFAULT false,
+ is_draft boolean NOT NULL DEFAULT false,
  created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS idx_journal_entries_user_date_desc ON journal_entries (user_id, entry_date DESC);
+CREATE INDEX IF NOT EXISTS idx_journal_entries_user_mood ON journal_entries (user_id, mood);
 CREATE TABLE IF NOT EXISTS web_sessions (
  token_hash text PRIMARY KEY, data jsonb NOT NULL, expires_at timestamptz NOT NULL
 );

@@ -1904,3 +1904,29 @@ dialog p {
 .account-sections dd { margin: 2px 0 12px; overflow-wrap: anywhere; }
 .account-sections dd:last-child { margin-bottom: 0; }
 .account-sections p { margin: 0 0 14px; }
+
+/* Signed-in appearance preference. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #ebf5f1;
+  --muted: #bbcfca;
+  --teal-dark: #95e1de;
+  --line: #47645f;
+  --error: #ffacbf;
+}
+[data-theme="dark"] body {
+  background: radial-gradient(ellipse at top right,#39354c,transparent 58%),#101f21;
+}
+[data-theme="dark"] :is(.app-shell,.sidebar,.glass,.form-card,.editor-card,.intention-card,.goal-card,.entry-preview,.empty-state,dialog) {
+  background: #203336;
+  color: var(--ink);
+  border-color: #46615f;
+}
+[data-theme="dark"] :is(.sidebar,.identity,.entry-actions,footer) { border-color: #46615f; }
+[data-theme="dark"] :is(a,.brand,.eyebrow,.prospect,.topbar .nav-button,.sidebar nav a,.journal-entry time,small,.hint,dt,footer,label,.journal-body,.private-intention,.entry-count) { color: var(--ink); }
+[data-theme="dark"] :is(a:hover,.sidebar nav a:hover:not(.active)) { color: #c3ffef; background-color: #304949; }
+[data-theme="dark"] :is(input,select,textarea) { background: #142529; border-color: #688781; color: #edf6f2; }
+[data-theme="dark"] :is(.pill,.avatar,.notice,.light-button) { color: #d5fff3; background: #294e4c; border-color: #4c7169; }
+[data-theme="dark"] :is(.field-error,.form-error,.entry-actions summary) { color: #ffacbf; }
+[data-theme="dark"] :is(button:hover,.button:hover) { background: #17616b; color: white; }
+[data-theme="dark"] .sidebar-caption { color: var(--muted); }
