@@ -1789,3 +1789,118 @@ dialog p {
     line-height: 1.5;
   }
 }
+
+/* Shared desktop frame for pages opened while logged out. */
+@media (min-width: 751px) {
+  body:has(.public-shell) {
+    display: flow-root;
+    margin: 0;
+  }
+
+  .app-shell.public-shell {
+    box-sizing: border-box;
+    width: min(1080px, calc(100% - 40px));
+    height: min(580px, calc(100dvh - 32px));
+    min-height: 0;
+    margin: max(16px, calc((100dvh - 580px) / 2)) auto;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .public-shell .workspace {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 12px clamp(16px, 3vw, 40px) 0;
+  }
+
+  .public-shell .prospect {
+    display: none;
+  }
+
+  .public-shell .topbar,
+  .public-shell footer {
+    flex: none;
+    margin: 0;
+    padding: 6px 0;
+  }
+
+  .public-shell #main {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* Center short forms such as OTP and password reset. */
+  .public-shell #main > .centered {
+    box-sizing: border-box;
+    display: grid;
+    min-height: 100%;
+    margin: 0 auto;
+    padding: 8px 0;
+    align-content: safe center;
+    justify-items: center;
+  }
+
+  .public-shell .centered .form-card {
+    box-sizing: border-box;
+    width: min(100%, 520px);
+    margin: 0;
+    padding: 16px 20px;
+  }
+
+  .public-shell .page-heading {
+    margin: 8px 0 14px;
+  }
+
+  .public-shell .page-heading h1 {
+    margin: 4px 0;
+    font-size: 32px;
+  }
+}
+/* Give the desktop login fields more room. */
+@media (min-width: 900px) and (min-height: 620px) {
+  .public-shell .auth-layout .form-card:has(#login-form) {
+    align-self: start;
+    margin-top: 4px;
+    padding: 16px 20px;
+  }
+
+  .public-shell #login-form .field {
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .public-shell #login-form input:not([type="checkbox"]) {
+    min-height: 36px;
+  }
+
+  .public-shell #login-form .wide {
+    min-height: 38px;
+  }
+
+  .public-shell #login-form .form-bottom {
+    margin: 12px 0 0;
+  }
+}
+
+/* Let the available entries fill the row. */
+.journal-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 27rem), 1fr));
+}
+.overview-grid ~ .entry-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+.journal-entry h2 { margin: 14px 0 8px; }
+.journal-body { margin: 0 0 16px; }
+.account-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.account-sections h2 { margin: 0 0 16px; }
+.account-sections dl { margin: 0; }
+.account-sections dt { color: var(--teal-dark); font-size: .84rem; }
+.account-sections dd { margin: 2px 0 12px; overflow-wrap: anywhere; }
+.account-sections dd:last-child { margin-bottom: 0; }
+.account-sections p { margin: 0 0 14px; }

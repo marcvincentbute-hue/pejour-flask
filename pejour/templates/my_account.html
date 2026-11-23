@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><h1>My account</h1></div>
+<div class="account-sections">
+  <section class="glass">
+    <h2>Account details</h2>
+    <dl>
+      <dt>Display name</dt><dd>{{ user.profile.display_name or 'Not provided' }}</dd>
+      <dt>Username</dt><dd>{{ user.username }}</dd>
+      <dt>Email</dt><dd>{{ user.email or 'Not provided' }}</dd>
+      <dt>Account type</dt><dd>{{ 'Administrator' if user.role == 'admin' else 'Personal account' }}</dd>
+    </dl>
+  </section>
+  <section class="glass">
+    <h2>Journal profile</h2>
+    <dl>
+      <dt>Writing goal</dt><dd>{{ user.profile.writing_goal or 'No goal recorded' }}</dd>
+      <dt>Journal start date</dt><dd>{{ user.profile.journal_start or 'No start date recorded' }}</dd>
+    </dl>
+  </section>
+</div>
+{% endblock %}
