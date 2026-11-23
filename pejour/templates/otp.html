@@ -1,4 +1,10 @@
 {% extends 'base.html' %}{% from 'macros.html' import field,csrf_field,form_error with context %}
-{% block content %}<section class="centered"><div class="form-card"><span class="eyebrow">A LITTLE EXTRA PROTECTION</span><h1>{{ title }}</h1><p>Enter the six-digit code sent to your email. Each code expires after 5 minutes. Check Spam if needed.</p>{{ form_error(errors) }}
+{% block content %}<section class="centered"><div class="form-card"><span class="eyebrow">A LITTLE EXTRA PROTECTION</span><h1>{{ title }}</h1><p>{% if title == 'Verify your account' %}
+  Open the “Pejour — Verify your account” email and enter the six-digit code below.
+{% elif title == 'Verify your log-in' %}
+  Open the “Pejour — Your log-in code” email and enter the six-digit code below.
+{% else %}
+  Open the “Pejour — Password reset code” email and enter the six-digit code below.
+{% endif %}. Each code expires after 5 minutes. Check Spam if needed.</p>{{ form_error(errors) }}
 <form method="post" data-lock-seconds="{{ seconds }}">{{ csrf_field() }}{{ field('code','Verification code',maximum=6,placeholder='000000') }}<p class="lock-message" {% if not seconds %}hidden{% endif %}>Please wait <strong data-lock-count>{{ seconds }}</strong> seconds.</p><button class="wide" type="submit" data-lock-control {% if seconds %}disabled{% endif %}>Verify code</button></form>
 <form method="post" class="resend-form">{{ csrf_field() }}<input type="hidden" name="action" value="resend"><button class="text-button" type="submit" data-resend="{{ cooldown }}" {% if cooldown or seconds %}disabled{% endif %}>Resend code</button><span class="hint" id="resend-count"></span></form><p class="hint">Maximum 3 resends per 15 minutes. A new code cancels the previous code.</p></div></section>{% endblock %}
