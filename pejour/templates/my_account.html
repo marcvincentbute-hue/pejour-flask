@@ -4,9 +4,10 @@
 <div class="page-heading"><h1>My account</h1></div>
 <div class="account-sections">
   <section class="glass">
-    <h2>Edit profile</h2>
+    <h2>Profile</h2>
     <p>{{ 'Administrator' if user.role == 'admin' else 'Personal account' }}</p>
-    <form method="post">
+    {% if edit == 'profile' %}
+    <form method="post" action="{{ url_for('web.my_account', edit='profile') }}">
       {{ csrf_field() }}
       {{ field('display_name','Display name',value=data.get('display_name',''),maximum=30) }}
       {{ field('writing_goal','Writing goal','select',value=data.get('writing_goal',''),options=goals) }}
@@ -18,10 +19,34 @@
       </div>
       <button type="submit">Save profile</button>
     </form>
+    <a href="{{ url_for('web.my_account') }}">Back to account</a>
+    {% else %}
+    <dl>
+      <dt>Display name</dt><dd>{{ user.profile.display_name }}</dd>
+      <dt>Username</dt><dd>{{ user.username }}</dd>
+      <dt>Writing goal</dt><dd>{{ user.profile.writing_goal }}</dd>
+      <dt>Journal start date</dt><dd>{{ user.profile.journal_start }}</dd>
+    </dl>
+    <p><a href="{{ url_for('web.my_account', edit='profile') }}">Edit profile</a></p>
+    {% endif %}
+    <h3>Surname</h3>
+    {% if edit == 'surname' %}
+    <form method="post" action="{{ url_for('web.my_account', edit='surname') }}">
+      {{ csrf_field() }}
+      {{ field('family_name','Surname',value=data.get('family_name',''),maximum=50) }}
+      <button type="submit">Save surname</button>
+      <a href="{{ url_for('web.my_account') }}">Cancel</a>
+    </form>
+    {% else %}
+    <p>{{ user.profile.family_name or 'Not provided' }}</p>
+    <a href="{{ url_for('web.my_account', edit='surname') }}">Change surname</a>
+    {% endif %}
   </section>
   <section class="glass">
     <h2>Email address</h2>
     <p>{{ user.email }}</p>
+    {% if edit == 'email' %}
+    {% if not g.session.get('email_change') or request.args.get('new') %}
     <form method="post" action="{{ url_for('web.account_email') }}">
       {{ csrf_field() }}
       <div class="field"><label for="new-email">New email</label>
@@ -30,15 +55,22 @@
         <input type="password" name="password" id="email-password" autocomplete="current-password" required></div>
       <button type="submit">Send verification code</button>
     </form>
-    {% if g.session.get('email_change') %}
-    <hr>
+    {% else %}
     <form method="post" action="{{ url_for('web.account_email') }}">
       {{ csrf_field() }}
       <div class="field"><label for="email-code">Code sent to {{ g.session.email_change.email }}</label>
         <input id="email-code" name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></div>
       <button type="submit" name="action" value="confirm">Verify and save email</button>
     </form>
+    <a href="{{ url_for('web.my_account', edit='email', new=1) }}">Request another code</a>
     {% endif %}
+    <p><a href="{{ url_for('web.my_account') }}">Back to account</a></p>
+    {% else %}
+    <a href="{{ url_for('web.my_account', edit='email') }}">Change email</a>
+    {% endif %}
+    <hr>
+    <h3>Password</h3>
+    <a href="{{ url_for('web.forgot') }}">Change password</a>
   </section>
 </div>
 {% endblock %}

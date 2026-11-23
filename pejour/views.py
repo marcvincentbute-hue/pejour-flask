@@ -12,7 +12,7 @@ from psycopg.types.json import Jsonb
 from psycopg.errors import UniqueViolation
 from .db import execute, one, all_rows, connection, lock
 from .security import now, PHT, audit, hash_secret, verify, encrypt, decrypt, rotate_session, captcha_valid
-from .validation import QUESTIONS, GOALS, MOODS, journal_profile_errors, registration_errors, selected_questions, username_valid, answer_valid, strength, today, date_value, age
+from .validation import QUESTIONS, GOALS, MOODS, name_error, journal_profile_errors, registration_errors, selected_questions, username_valid, answer_valid, strength, today, date_value, age
 from .settings import IDLE_SECONDS, FORGOT_AFTER
 from .auth import account, guard, fail, captcha_failure, send_otp, check_otp, finish_login, change_password
 from .mail import DeliveryError
@@ -462,6 +462,18 @@ def my_account():
     user = g.user
     data = dict(user['profile'], username=user['username'])
     errors = {}
+    edit = request.args.get('edit', '')
+    if request.method == 'POST' and edit == 'surname':
+        surname = request.form.get('family_name', '')
+        error = name_error(surname, 'Family Name')
+        if error:
+            return render_template('my_account.html', title='My account', edit=edit,
+                                   data=request.form, errors={'family_name': error})
+        execute('UPDATE users SET profile=profile || %s WHERE id=%s',
+                (Jsonb({'family_name': surname}), user['id']))
+        audit('PROFILE_UPDATED', user['username'], user['id'])
+        g.session['notice'] = 'Your surname has been saved.'
+        return redirect(url_for('web.my_account'))
     if request.method == 'POST':
         data = request.form
         errors = journal_profile_errors(data)
@@ -485,7 +497,7 @@ def my_account():
                 audit('PROFILE_UPDATED', username, user['id'])
                 g.session['notice'] = 'Your profile has been saved.'
                 return redirect(url_for('web.my_account'))
-    return render_template('my_account.html', title='My account', data=data, errors=errors)
+    return render_template('my_account.html', title='My account', edit='profile' if errors else edit, data=data, errors=errors)
 
 
 @bp.post('/my-account/email')
@@ -536,7 +548,7 @@ def account_email():
                 g.session['email_change'] = {'email': email, 'otp_id': latest['id']}
                 message = 'Verification code sent to your new email.'
     g.session['notice'] = message
-    return redirect(url_for('web.my_account'))
+    return redirect(url_for('web.my_account', edit='email'))
 
 
 @bp.route('/settings', methods=['GET', 'POST'])
