@@ -1,0 +1,10 @@
+"""Class-wide settings announced November 16, 2026. No student-number formulas."""
+USERNAME_MIN = 6
+USERNAME_MAX = 20
+PASSWORD_MIN = 8
+NAME_MAX = 50
+FORGOT_AFTER = 2
+LOCKOUT_SECONDS = (15, 30, 60)
+OTP_MINUTES = 5
+IDLE_SECONDS = 15 * 60
+IP_FAILURE_THRESHOLD = 10
