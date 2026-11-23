@@ -559,6 +559,8 @@ def settings_page():
         if theme not in ('dark', 'light'):
             abort(400)
         execute('UPDATE users SET profile=profile || %s WHERE id=%s', (Jsonb({'theme': theme}), g.user['id']))
+        if json_request():
+            return jsonify(theme=theme)
         g.session['notice'] = 'Appearance saved.'
         return redirect(url_for('web.settings_page'))
     return render_template('settings.html', title='Settings')

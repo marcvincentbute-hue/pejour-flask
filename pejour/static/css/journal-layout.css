@@ -101,3 +101,34 @@ html[data-theme="dark"] .workspace .button:not(.light-button) { color: white; }
   .public-shell .workspace .form-card .field { margin-bottom: 9px; }
   .public-shell .workspace .form-card :is(input:not([type=checkbox]),select) { min-height: 38px; }
 }
+
+#theme-form .theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 44px;
+  padding: 6px 0;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+  transform: none;
+}
+.theme-track {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  width: 40px;
+  height: 24px;
+  background: #5d706d;
+  border-radius: 20px;
+}
+.theme-track::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+}
+.theme-switch[aria-checked="true"] .theme-track { background: #077a79; }
+.theme-switch[aria-checked="true"] .theme-track::before { transform: translateX(16px); }
+#theme-form [role="status"]:not(:empty) { display: block; margin-top: 6px; }

@@ -1,17 +1,20 @@
 {% extends 'base.html' %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/theme-switch.js') }}" defer></script>
+{% endblock %}
 {% block content %}
 <div class="page-heading"><h1>Settings</h1></div>
 <div class="account-sections">
   <section class="glass">
     <h2>Appearance</h2>
-    <form method="post">
+    {% set dark = user.profile.get('theme') == 'dark' %}
+    <form id="theme-form" method="post" action="{{ url_for('web.settings_page') }}">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      <div class="field"><label for="theme">Journal theme</label>
-        <select id="theme" name="theme">
-          <option value="light"{% if user.profile.get('theme') != 'dark' %} selected{% endif %}>Light mode</option>
-          <option value="dark"{% if user.profile.get('theme') == 'dark' %} selected{% endif %}>Dark mode</option>
-        </select>
-      </div><button type="submit">Save appearance</button>
+      <input type="hidden" name="theme" value="{{ 'light' if dark else 'dark' }}">
+      <button class="theme-switch" type="submit" role="switch" aria-checked="{{ 'true' if dark else 'false' }}">
+        Dark mode <span class="theme-track" aria-hidden="true"></span>
+      </button>
+      <small role="status" aria-live="polite"></small>
     </form>
   </section>
   <section class="glass">
