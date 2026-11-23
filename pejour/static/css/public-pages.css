@@ -1,0 +1,276 @@
+/* Public pages share one viewport with a stationary header and footer. */
+.public-shell {
+  width: min(1220px, calc(100% - 32px));
+  height: calc(100dvh - 24px);
+  min-height: 0;
+  margin: 12px auto;
+}
+
+.public-shell .workspace {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px clamp(14px, 3vw, 40px) 0;
+}
+
+.public-shell .prospect {
+  display: none;
+}
+
+.public-shell .topbar, .public-shell footer {
+  flex: none;
+  margin: 0;
+  padding: 6px 0;
+}
+
+.public-shell main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.public-shell :is(.hero,.auth-layout,.welcome-layout) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 490px);
+  gap: clamp(16px, 4vw, 64px);
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 10px 2px;
+}
+
+.public-shell :is(.form-card,.reflection-card) {
+  width: 100%;
+  max-width: none;
+  max-height: 100%;
+  overflow: auto;
+  padding: clamp(15px, 2.3vh, 26px);
+  border-radius: 22px;
+  background: #f7fbf8;
+  box-shadow: 0 16px 32px -20px #385e57;
+}
+
+.public-shell .field {
+  margin: 0 0 5px;
+  min-width: 0;
+}
+
+.public-shell .field-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 5px 12px;
+}
+
+.public-shell :is(input:not([type=checkbox]),select,textarea) {
+  padding: 6px 9px;
+  min-height: 34px;
+  width: 100%;
+}
+
+.public-shell fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.public-shell legend {
+  font-weight: 650;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.public-shell legend span {
+  display: none;
+}
+
+.public-shell .form-card p {
+  margin-bottom: 8px;
+}
+
+.public-shell .captcha-row img {
+  width: 155px;
+  height: auto;
+}
+
+.public-shell .field-error:empty {
+  display: none;
+}
+
+.step-list {
+  padding-left: 22px;
+  color: var(--muted);
+}
+
+.step-list li {
+  padding: 4px;
+}
+
+.step-list [aria-current] {
+  color: var(--teal-dark);
+  font-weight: 700;
+}
+
+.wizard-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin: 10px 0;
+}
+
+#previous-step {
+  background: #e2eee8;
+  color: var(--ink);
+  margin-right: auto;
+}
+
+@media(max-width:750px) {
+  .public-shell {
+    width: calc(100% - 12px);
+    height: calc(100dvh - 12px);
+    margin: 6px auto;
+  }
+  .public-shell :is(.hero,.auth-layout,.welcome-layout) {
+    grid-template-columns: minmax(0,1fr);
+    gap: 8px;
+  }
+  .public-shell :is(.auth-intro,.welcome-copy) {
+    display: none;
+  }
+  .public-shell .hero {
+    grid-template-rows: auto minmax(0,auto);
+    align-content: center;
+  }
+  .public-shell .hero h1 {
+    font-size: 32px;
+  }
+  .public-shell .hero .ruled-lines {
+    display: none;
+  }
+  .public-shell .form-card {
+    align-self: center;
+  }
+}
+
+@media (min-width: 751px) {
+  body:has(.public-shell .hero) {
+    display: flow-root;
+  }
+  .public-shell:has(.hero) {
+    width: min(1080px, calc(100% - 40px));
+    height: min(580px, calc(100dvh - 32px));
+    margin: max(16px, calc((100dvh - 580px) / 2)) auto;
+  }
+  .public-shell .hero {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    padding-inline: 6px;
+  }
+  .public-shell .hero h1 {
+    font-size: clamp(32px, 3.3vw, 46px);
+    margin: 14px 0;
+  }
+  .hero .lead {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .hero .reflection-card {
+    transform: none;
+  }
+  .hero .reflection-quote {
+    font-size: clamp(20px, 2vw, 25px);
+    margin: 18px 0;
+  }
+  .hero .trustline {
+    margin-top: 16px;
+  }
+}
+
+@media (min-width: 751px) {
+  body:has(.public-shell .auth-layout) {
+    display: flow-root;
+  }
+  .public-shell:has(.auth-layout) {
+    width: min(1080px, calc(100% - 40px));
+    height: min(580px, calc(100dvh - 32px));
+    margin: max(16px, calc((100dvh - 580px) / 2)) auto;
+  }
+  .public-shell .auth-layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(18px, 3vw, 40px);
+    padding: 4px 6px;
+  }
+  .public-shell .auth-intro h1 {
+    font-size: clamp(32px, 3.3vw, 46px);
+    line-height: 1.15;
+    margin: 14px 0;
+  }
+  .public-shell .auth-layout .form-card {
+    box-sizing: border-box;
+    padding: 12px 18px;
+    line-height: 1.35;
+    min-height: 0;
+  }
+  .auth-layout .form-card :is(h1, h2, legend) {
+    margin: 3px 0 6px;
+    line-height: 1.2;
+  }
+  .auth-layout .form-card p {
+    margin: 4px 0;
+  }
+  .public-shell .auth-layout .field-grid {
+    gap: 4px 12px;
+  }
+  .public-shell .auth-layout .field {
+    margin: 0 0 3px;
+  }
+  .auth-layout .form-card label {
+    margin-bottom: 2px;
+  }
+  .public-shell .auth-layout :is(input:not([type="checkbox"]), select) {
+    box-sizing: border-box;
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+  .auth-layout .form-card .captcha-row {
+    margin: 6px 0;
+    padding: 4px 0;
+  }
+  .public-shell .auth-layout .captcha-row img {
+    width: 126px;
+    height: auto;
+  }
+  .auth-layout .form-card .wizard-actions {
+    margin: 6px 0;
+  }
+  .auth-layout .form-card :is(button[type="submit"], .wizard-actions button) {
+    min-height: 34px;
+    padding: 7px 14px;
+  }
+}
+
+@media (min-width: 900px) {
+  .public-shell .form-card:has(#captcha):not(.register-card) .captcha-block {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    margin: 8px 0;
+    padding: 8px 0 0;
+  }
+
+  .public-shell .form-card:has(#captcha):not(.register-card) .captcha-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .public-shell .form-card:has(#captcha):not(.register-card) .captcha-block .field {
+    min-width: 0;
+    margin: 0;
+  }
+}
