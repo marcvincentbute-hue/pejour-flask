@@ -50,7 +50,7 @@ function messageFor(id) {
     if (id==='zip_code') return /^[0-9]{4}$/.test(value)?'':'ZIP Code must contain exactly 4 digits.';
     if (id==='email') return value.length<=100 && !/\s/.test(value) && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value) && !input.validity.typeMismatch?'':'Please enter a valid email address.';
     if (id==='username') {
-        if (value.length<rules.username_min || value.length>rules.username_max || !/^[A-Za-z][A-Za-z0-9]*$/.test(value)) return `Username must start with a letter and contain ${rules.username_min}â€“${rules.username_max} letters and digits.`;
+        if (value.length<rules.username_min || value.length>rules.username_max || !/^[A-Za-z][A-Za-z0-9]*$/.test(value)) return `Username must start with a letter and contain ${rules.username_min} to ${rules.username_max} letters and digits.`;
         return availability.username===value && availability.available===false?'This username is already registered.':'';
     }
     if (id==='password') return strengthError(value);
