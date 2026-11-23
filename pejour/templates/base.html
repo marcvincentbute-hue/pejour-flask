@@ -11,6 +11,9 @@
   <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 
   {% block scripts %}{% endblock %}
+  {% if request.endpoint != 'web.dashboard' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-layout.css') }}">
+  {% endif %}
 </head>
 
 <body {% if user %}data-authenticated="true" data-idle-seconds="{{ idle_seconds }}"{% endif %}>

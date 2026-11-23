@@ -1,0 +1,103 @@
+/* Shared surfaces and type for the personal journal. */
+:root {
+  --paper: #fafdfb;
+  --frame: rgba(242, 248, 245, .95);
+  --rail: #e5f0eb;
+  --edge: #c8dad2;
+  --accent: #056875;
+  --panel-shadow: 0 5px 18px -12px rgba(23, 64, 57, .28);
+}
+html[data-theme="dark"] {
+  --paper: #213437;
+  --frame: #182a2d;
+  --rail: #1b3032;
+  --edge: #405957;
+  --accent: #a8e1db;
+  --panel-shadow: none;
+}
+body { font-size: 15px; }
+.app-shell {
+  border: 1px solid var(--edge);
+  border-radius: 20px;
+  background: var(--frame);
+  box-shadow: 0 16px 48px -28px rgba(24, 58, 54, .38);
+}
+:is(.glass,.form-card,.reflection-card) {
+  border: 1px solid var(--edge);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: var(--panel-shadow);
+}
+.sidebar { background: var(--rail); border-color: var(--edge); }
+.sidebar nav { gap: 4px; margin: 22px 0; }
+.sidebar nav a { font-size: 14px; padding: 10px 14px; border-radius: 9px; }
+.sidebar nav a.active { background: #096976; color: #fff; box-shadow: none; }
+.sidebar .brand { font-size: 32px; }
+.sidebar-caption,.sidebar-note { display: none; }
+.sidebar .identity { margin-top: auto; border-color: var(--edge); }
+.topbar,footer { border-color: var(--edge); }
+.topbar { border-bottom: 1px solid var(--edge); padding-block: 8px; }
+.topbar .prospect { margin: 0; font-size: 12px; letter-spacing: .08em; }
+.workspace h1 { text-wrap: balance; overflow-wrap: anywhere; }
+.workspace :is(h2,h3) { letter-spacing: -.025em; }
+.workspace .eyebrow { font-size: 11px; letter-spacing: .1em; }
+.workspace .page-heading h1 { line-height: 1.18; }
+.workspace .button,.workspace button:not(.nav-button,.text-button) { border-radius: 9px; }
+.workspace :is(input:not([type=checkbox]):not([type=radio]),select,textarea) {
+  border-radius: 8px;
+  border-color: var(--edge);
+}
+.workspace .field { min-width: 0; }
+.field-error:empty,.hint:empty { display: none; }
+.workspace :focus-visible { outline: 3px solid #896ac3; outline-offset: 3px; }
+.workspace .notice { margin: 4px 0 14px; border-radius: 10px; }
+.workspace .overview-grid,.workspace .account-sections { gap: 16px; }
+.workspace .overview-grid > section,.workspace .account-sections > section { padding: 22px; }
+.workspace .intention-card { background: var(--paper); }
+.workspace .goal-card { background: #efedf6; }
+.workspace .private-intention,.workspace .journal-body {
+  max-width: 75ch; font-family: Georgia, serif; font-size: 17px; line-height: 1.65;
+}
+.workspace .private-intention { margin-block: 12px; overflow-wrap: anywhere; }
+.workspace .write-card { border-radius: 14px; background: #0d646d; }
+.workspace .entry-preview { padding: 18px 20px; }
+.workspace .entry-preview h3 { margin: 12px 0 6px; }
+.workspace .journal-entry { padding: 22px; }
+.workspace .entry-actions { margin-top: 16px; border-color: var(--edge); }
+.workspace .account-sections dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 18px; margin-bottom: 14px; }
+.workspace .account-sections dd { margin: 0; }
+.workspace .account-sections h3 { margin: 20px 0 8px; }
+.workspace .account-sections hr { border: 0; border-top: 1px solid var(--edge); margin: 20px 0; }
+.account-sections form > .field { margin-bottom: 12px; }
+.editor-card { width: 100%; margin-inline: auto; }
+.workspace .editor-card textarea { min-height: 9rem; }
+.prose { max-width: 80ch; margin-inline: auto; }
+.prose p { line-height: 1.7; }
+html[data-theme="dark"] :is(.workspace .goal-card,.workspace .intention-card) { background: var(--paper); }
+html[data-theme="dark"] .workspace .light-button { background: #d6ede7; color: #144b4b; }
+html[data-theme="dark"] .workspace .button:not(.light-button) { color: white; }
+@media (min-width: 1000px) {
+  body[data-authenticated] .workspace { padding: 0 clamp(22px, 2.2vw, 36px); }
+  body[data-authenticated] .sidebar { padding: 24px 16px; }
+  body[data-authenticated] .workspace .topbar { min-height: 48px; margin: 0; }
+  body[data-authenticated] .workspace main { padding: 20px 4px 16px; }
+  body[data-authenticated] .workspace .page-heading { margin: 0 0 18px; }
+  body[data-authenticated] .workspace .page-heading h1 { font-size: clamp(28px, 2.3vw, 38px); }
+  body[data-authenticated] .workspace .section-heading:not(.page-heading) { margin: 22px 0 12px; }
+  body[data-authenticated] .workspace footer { border-top: 1px solid var(--edge); padding: 10px 0; }
+}
+@media (min-width: 751px) {
+  /* Long registration and recovery forms follow the normal page scroll. */
+  body .app-shell.public-shell {
+    height: auto; min-height: min(680px, calc(100dvh - 48px));
+    width: min(1140px, calc(100% - 48px)); margin: 24px auto;
+  }
+  .public-shell .workspace { padding-inline: clamp(24px, 3vw, 44px); }
+  .public-shell .workspace main,.public-shell .auth-layout .form-card,
+  .public-shell .workspace .reflection-card { max-height: none; overflow: visible; }
+  .public-shell .workspace .topbar { padding-block: 12px; }
+  .public-shell .workspace :is(.hero,.auth-layout,.recovery-layout,.centered) { padding-block: 24px; }
+  .public-shell .workspace :is(.form-card,.reflection-card) { padding: 24px; border-radius: 16px; }
+  .public-shell .workspace .form-card .field { margin-bottom: 9px; }
+  .public-shell .workspace .form-card :is(input:not([type=checkbox]),select) { min-height: 38px; }
+}
