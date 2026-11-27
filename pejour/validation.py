@@ -142,7 +142,7 @@ def registration_errors(data):
     )
     check(
         'password',
-        strength(data.get('password', '')) != 'Strong',
+        strength(data.get('password', '')) == 'Strong',
         'Use 14-64 characters with uppercase, lowercase, a number, and a symbol. No spaces.'
     )
     check(
