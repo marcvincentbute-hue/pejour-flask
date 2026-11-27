@@ -19,7 +19,7 @@
     </ol>
   </aside>
   <div class="form-card register-card">{{ form_error(errors) }}
-    <form id="registration-form" method="post" data-rules='{{ {"name_max":50,"username_min":6,"username_max":20,"password_min":8,"password_max":64,"today":today}|tojson }}'>{{ csrf_field() }}
+    <form id="registration-form" method="post" data-rules='{{ {"name_max":50,"username_min":6,"username_max":20,"password_min":14,"password_max":64,"today":today}|tojson }}'>{{ csrf_field() }}
       <div class="honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" tabindex="-1" autocomplete="off">
       </div>
       <fieldset>
@@ -45,7 +45,7 @@
         <legend><span>03</span> Account security</legend>
         <div class="field-grid">{{ field('email','Email','email',value=data.get('email',''),maximum=100,hint='Use an inbox you can open for verification codes.') }}
           {{ field('username','Username',value=data.get('username',''),maximum=20,hint='6–20 letters and digits; start with a letter.') }}
-          {{ field('password','Password','password',maximum=64,hint='Use 14-64 characters with uppercase, lowercase, a number, and a symbol. No spaces.'; at least three of uppercase, lowercase, digits and symbols. No spaces.') }}
+          {{ field('password', 'Password', 'password', minimum=14, maximum=64, hint='Use 14-64 characters with uppercase, lowercase, a number, and a symbol. No spaces.') }}
           {{ field('password_confirm','Re-enter Password','password',maximum=64) }}
         </div>{{ password_tools() }}
       </fieldset>
