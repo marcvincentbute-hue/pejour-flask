@@ -408,8 +408,11 @@ def password():
     errors = {}
     if request.method == 'POST':
         value = request.form.get('password', '')
-        if strength(value) == 'Weak':
-            errors['password'] = 'Use 8–64 characters, at least three character groups, and no whitespace.'
+        if strength(value) != 'Strong':
+            errors['password'] = (
+                'Use 14-64 characters with uppercase, lowercase, '
+                'a number, and a symbol. No spaces.'
+            )
         if value != request.form.get('password_confirm'):
             errors['password_confirm'] = 'Mismatch Password.'
         if not errors:
@@ -442,15 +445,29 @@ def session_status():
 @protected()
 def account_page():
     count = one('SELECT count(*) AS n FROM journal_entries WHERE user_id=%s', (g.user['id'],))['n']
+    show_preview = g.user['profile'].get('show_draft_preview', True)
     entries = all_rows(
-        'SELECT id,title,entry_date,mood FROM journal_entries WHERE user_id=%s ORDER BY entry_date DESC,id DESC LIMIT 3',
-        (g.user['id'],)
+        'SELECT id,title,entry_date,mood,is_draft FROM journal_entries '
+        'WHERE user_id=%s AND (%s OR NOT is_draft) ORDER BY entry_date DESC,id DESC LIMIT 3',
+        (g.user['id'], show_preview)
     )
     for entry in entries:
         entry['title'] = decrypt(entry['title'], f"{g.user['id']}:entry:{entry['id']}:title")
+    draft = one(
+        'SELECT id,title,body,entry_date FROM journal_entries '
+        'WHERE user_id=%s AND is_draft ORDER BY updated_at DESC,id DESC LIMIT 1',
+        (g.user['id'],)
+    )
+    if draft and show_preview:
+        prefix = f"{g.user['id']}:entry:{draft['id']}"
+        draft['title'] = decrypt(draft['title'], prefix + ':title')
+        body = decrypt(draft['body'], prefix + ':body')
+        draft['preview'] = next((line.strip() for line in body.splitlines() if line.strip()), '')
     return render_template(
         'account.html',
         title='Your journal, your space',
+        draft=draft,
+        show_preview=show_preview,
         count=count,
         entries=entries,
         intention=decrypt(g.user['intention'], g.user['id'] + ':intention')
@@ -555,13 +572,24 @@ def account_email():
 @protected()
 def settings_page():
     if request.method == 'POST':
-        theme = request.form.get('theme')
-        if theme not in ('dark', 'light'):
+        if 'theme' in request.form:
+            theme = request.form['theme']
+            if theme not in ('dark', 'light'):
+                abort(400)
+            change = {'theme': theme}
+        elif 'journal_text_size' in request.form:
+            size = request.form['journal_text_size']
+            if size not in ('small', 'default', 'large'):
+                abort(400)
+            change = {'journal_text_size': size}
+        elif request.form.get('show_draft_preview') in ('on', 'off'):
+            change = {'show_draft_preview': request.form['show_draft_preview'] == 'on'}
+        else:
             abort(400)
-        execute('UPDATE users SET profile=profile || %s WHERE id=%s', (Jsonb({'theme': theme}), g.user['id']))
+        execute('UPDATE users SET profile=profile || %s WHERE id=%s', (Jsonb(change), g.user['id']))
         if json_request():
-            return jsonify(theme=theme)
-        g.session['notice'] = 'Appearance saved.'
+            return jsonify(change)
+        g.session['notice'] = 'Setting saved.'
         return redirect(url_for('web.settings_page'))
     return render_template('settings.html', title='Settings')
 
@@ -609,14 +637,20 @@ def journal_edit(entry_id=None):
             data[key] = decrypt(entry[key], f"{g.user['id']}:entry:{entry_id}:{key}")
     if request.method == 'POST':
         data = request.form
-        if not 1 <= len(data.get('title', '').strip()) <= 120:
-            errors['title'] = 'Title must be 1–120 characters.'
-        if not 1 <= len(data.get('body', '').strip()) <= 10000:
-            errors['body'] = 'Entry must be 1–10,000 characters.'
+        saving_draft = data.get('action') == 'draft'
+        title_text = data.get('title', '')
+        body_text = data.get('body', '')
+        if len(title_text) > 120 or (not saving_draft and not title_text.strip()):
+            errors['title'] = 'Enter a title of up to 120 characters.'
+        if len(body_text) > 10000 or (not saving_draft and not body_text.strip()):
+            errors['body'] = 'Enter up to 10,000 characters.'
+        if saving_draft and not (title_text.strip() or body_text.strip()):
+            errors['_form'] = 'Add a title or a few words before saving a draft.'
         day = date_value(data.get('entry_date', ''))
         if not day or day.isoformat() < g.user['profile']['journal_start']:
             errors['entry_date'] = 'Choose a date from your journaling start date through today.'
-        if data.get('mood') not in MOODS:
+        mood = data.get('mood', '')
+        if mood not in MOODS and (mood or not saving_draft):
             errors['mood'] = 'Please select a valid mood.'
         if not errors:
             if entry:
@@ -631,14 +665,14 @@ def journal_edit(entry_id=None):
                 if not entry:
                     entry_id = one(
                         'INSERT INTO journal_entries(user_id,title,body,entry_date,mood) VALUES(%s,%s,%s,%s,%s) RETURNING id',
-                        (g.user['id'], '', '', day, data['mood'])
+                        (g.user['id'], '', '', day, mood)
                     )['id']
-                word_count = len(data['body'].split())
-                title = encrypt(data['title'], f"{g.user['id']}:entry:{entry_id}:title")
-                body = encrypt(data['body'], f"{g.user['id']}:entry:{entry_id}:body")
+                word_count = len(body_text.split())
+                title = encrypt(title_text, f"{g.user['id']}:entry:{entry_id}:title")
+                body = encrypt(body_text, f"{g.user['id']}:entry:{entry_id}:body")
                 execute(
-                    'UPDATE journal_entries SET title=%s,body=%s,entry_date=%s,mood=%s,word_count=%s,version=version+1,updated_at=%s WHERE id=%s AND user_id=%s',
-                    (title, body, day, data['mood'], word_count, now(), entry_id, g.user['id'])
+                    'UPDATE journal_entries SET title=%s,body=%s,entry_date=%s,mood=%s,word_count=%s,is_draft=%s,version=version+1,updated_at=%s WHERE id=%s AND user_id=%s',
+                    (title, body, day, mood, word_count, saving_draft, now(), entry_id, g.user['id'])
                 )
                 audit(
                     'JOURNAL_UPDATED' if entry else 'JOURNAL_CREATED',
@@ -646,8 +680,8 @@ def journal_edit(entry_id=None):
                     g.user['id'],
                     f'Entry {entry_id}; content omitted.'
                 )
-                g.session['notice'] = 'Your entry has been saved.'
-                return redirect(url_for('web.journal'))
+                g.session['notice'] = 'Draft saved.' if saving_draft else 'Your entry has been saved.'
+                return redirect(url_for('web.account_page' if saving_draft else 'web.journal'))
     return render_template(
         'journal_edit.html',
         title='Edit your entry' if entry else 'A moment for yourself',

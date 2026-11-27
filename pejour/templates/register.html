@@ -1,25 +1,76 @@
-{% extends 'base.html' %}{% from 'macros.html' import field,captcha,password_tools,csrf_field,form_error with context %}
-{% block scripts %}<script src="{{ url_for('static',filename='js/registration-validation.js') }}" defer></script><script src="{{ url_for('static',filename='js/register.js') }}" defer></script>{% endblock %}
+{% extends 'base.html' %}
+{% from 'macros.html' import field,captcha,password_tools,csrf_field,form_error with context %}
+{% block scripts %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/public-pages.css') }}">
+<script src="{{ url_for('static',filename='js/registration-validation.js') }}" defer>
+</script>
+<script src="{{ url_for('static',filename='js/register.js') }}" defer>
+</script>{% endblock %}
 {% block content %}
-<div class="page-heading"><span class="eyebrow">YOUR STORY STARTS HERE</span><h1>A space of your own.</h1><p>Create your account. Fields marked with <span class="required">*</span> are required.</p></div>
-<div class="registration-layout"><aside class="registration-aside"><div class="glass"><span class="eyebrow">A THOUGHTFUL BEGINNING</span><h3>Make room for what matters.</h3><p>A few details to set up your account, a writing goal to guide you, and a private place to begin.</p><ol><li>Your identity</li><li>Your address</li><li>Account security</li><li>Your journal</li></ol><small>Your private intention and journal content are encrypted. Passwords and security answers are stored as hashes.</small></div></aside>
-<div class="form-card register-card">{{ form_error(errors) }}<form id="registration-form" method="post" data-rules='{{ {"name_max":50,"username_min":6,"username_max":20,"password_min":8,"password_max":64,"today":today}|tojson }}'>{{ csrf_field() }}
-<div class="honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
-<fieldset><legend><span>01</span> Your identity</legend><div class="field-grid">
-{{ field('id','ID Number',value=data.get('id',''),placeholder='xxxx-xxxx',maximum=9) }}
-{{ field('first_name','First Name',value=data.get('first_name',''),maximum=50) }}{{ field('middle_name','Middle Name',required=false,value=data.get('middle_name',''),maximum=50) }}{{ field('family_name','Family Name',value=data.get('family_name',''),maximum=50) }}
-{{ field('name_extension','Name Extension','select',required=false,value=data.get('name_extension',''),options=['Jr.','Sr.','Other']) }}{{ field('extension_other','Other Extension',required=false,value=data.get('extension_other',''),hint='For Other: I, II, III, IV, IX or X.') }}
-{{ field('birthdate','Birthdate','date',value=data.get('birthdate',''),maximum=today) }}{{ field('age','Age',required=false,readonly=true,hint='Calculated from your birthdate. You must be at least 18.') }}
-</div></fieldset>
-<fieldset><legend><span>02</span> Your address</legend><div class="field-grid">
-{% for name,label in [('street','Purok / Street'),('barangay','Barangay'),('city','Municipality / City'),('province','Province'),('country','Country'),('zip_code','ZIP Code')] %}{{ field(name,label,value=data.get(name,''),hint='Use Title Case, for example Agusan Del Norte.' if name=='province' else '',maximum=100 if name=='country' else 50) }}{% endfor %}
-</div></fieldset>
-<fieldset><legend><span>03</span> Account security</legend><div class="field-grid">{{ field('email','Email','email',value=data.get('email',''),maximum=100,hint='Use an inbox you can open for verification codes.') }}{{ field('username','Username',value=data.get('username',''),maximum=20,hint='6–20 letters and digits; start with a letter.') }}{{ field('password','Password','password',maximum=64,hint='8–64 characters; at least three of uppercase, lowercase, digits and symbols. No spaces.') }}{{ field('password_confirm','Re-enter Password','password',maximum=64) }}</div>{{ password_tools() }}
-<h3>Your recovery questions</h3><p class="hint">Choose three different questions from the bank. Use answers you can remember. They are not stored as readable text.</p>
-{% for slot in range(1,4) %}<div class="field"><label for="question_{{ slot }}">Security Question {{ slot }} <span class="required">*</span></label><select id="question_{{ slot }}" name="question_{{ slot }}" required><option value="">Choose a question</option>{% for number,question in questions.items() %}<option value="{{ number }}" {% if data.get('question_'~slot)|string==number|string %}selected{% endif %}>{{ question }}</option>{% endfor %}</select><span class="field-error" id="error-question_{{ slot }}">{{ errors.get('question_'~slot,'') }}</span></div>{{ field('answer_'~slot,'Answer '~slot,'password',maximum=50,hint='2–50 letters and single spaces. Answers are case-insensitive.') }}{% endfor %}
-</fieldset>
-<fieldset><legend><span>04</span> Make your journal yours</legend><div class="field-grid">{{ field('display_name','Journal Display Name',value=data.get('display_name',''),maximum=30) }}{{ field('journal_start','Journaling Start Date','date',value=data.get('journal_start',today),maximum=today) }}{{ field('writing_goal','Writing Goal','select',value=data.get('writing_goal',''),options=goals) }}</div>{{ field('intention','Private Journaling Intention','textarea',value=data.get('intention',''),maximum=300,hint='10–300 characters. Only you can view this intention after log-in.') }}</fieldset>
-<fieldset><legend><span>05</span> One last security check</legend>{{ captcha(errors) }}<label class="check-label consent"><input type="checkbox" id="consent" name="consent" value="1" required> <span>I have read the <a href="{{ url_for('web.privacy') }}" target="_blank" rel="noopener">Privacy Notice</a> and agree to the collection and processing of my personal data in accordance with the Data Privacy Act of 2012 (RA 10173). <span class="required">*</span></span></label><span class="field-error" id="error-consent">{{ errors.get('consent','') }}</span></fieldset>
-<button class="wide" type="submit">Create account &amp; verify email <span aria-hidden="true">→</span></button><p class="hint">Your account opens after email verification. Your password stays in this page while form errors are corrected.</p>
-</form></div></div>
+<div class="welcome-layout auth-layout">
+  <aside class="welcome-copy"><span class="eyebrow">YOUR STORY STARTS HERE</span>
+    <h1>A space of your own.</h1>
+    <p>Create your account. Fields marked with <span class="required">*</span> are required.</p>
+    <ol class="step-list">
+      <li>Your identity</li>
+      <li>Your address</li>
+      <li>Account security</li>
+      <li>Make your journal yours</li>
+    </ol>
+  </aside>
+  <div class="form-card register-card">{{ form_error(errors) }}
+    <form id="registration-form" method="post" data-rules='{{ {"name_max":50,"username_min":6,"username_max":20,"password_min":8,"password_max":64,"today":today}|tojson }}'>{{ csrf_field() }}
+      <div class="honeypot" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <fieldset>
+        <legend><span>01</span> Your identity</legend>
+        <div class="field-grid">
+          {{ field('id','ID Number',value=data.get('id',''),placeholder='xxxx-xxxx',maximum=9) }}
+          {{ field('first_name','First Name',value=data.get('first_name',''),maximum=50) }}
+          {{ field('middle_name','Middle Name',required=false,value=data.get('middle_name',''),maximum=50) }}
+          {{ field('family_name','Family Name',value=data.get('family_name',''),maximum=50) }}
+          {{ field('name_extension','Name Extension','select',required=false,value=data.get('name_extension',''),options=['Jr.','Sr.','Other']) }}
+          {{ field('extension_other','Other Extension',required=false,value=data.get('extension_other',''),hint='For Other: I, II, III, IV, IX or X.') }}
+          {{ field('birthdate','Birthdate','date',value=data.get('birthdate',''),maximum=today) }}
+          {{ field('age','Age',required=false,readonly=true,hint='Calculated from your birthdate. You must be at least 18.') }}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span>02</span> Your address</legend>
+        <div class="field-grid">
+          {% for name,label in [('street','Purok / Street'),('barangay','Barangay'),('city','Municipality / City'),('province','Province'),('country','Country'),('zip_code','ZIP Code')] %}{{ field(name,label,value=data.get(name,''),hint='Use Title Case, for example Agusan Del Norte.' if name=='province' else '',maximum=100 if name=='country' else 50) }}{% endfor %}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span>03</span> Account security</legend>
+        <div class="field-grid">{{ field('email','Email','email',value=data.get('email',''),maximum=100,hint='Use an inbox you can open for verification codes.') }}
+          {{ field('username','Username',value=data.get('username',''),maximum=20,hint='6–20 letters and digits; start with a letter.') }}
+          {{ field('password','Password','password',maximum=64,hint='Use 14-64 characters with uppercase, lowercase, a number, and a symbol. No spaces.'; at least three of uppercase, lowercase, digits and symbols. No spaces.') }}
+          {{ field('password_confirm','Re-enter Password','password',maximum=64) }}
+        </div>{{ password_tools() }}
+      </fieldset>
+      <fieldset>
+        <legend>Your recovery questions</legend>
+        <p class="hint">Choose three different questions from the bank. Use answers you can remember. They are not stored as readable text.</p>
+        <div class="field-grid">{% for slot in range(1,4) %}
+          <div class="field"><label for="question_{{ slot }}">Security Question {{ slot }} <span class="required">*</span></label><select id="question_{{ slot }}" name="question_{{ slot }}" required><option value="">Choose a question</option>{% for number,question in questions.items() %}<option value="{{ number }}" {% if data.get('question_'~slot)|string==number|string %}selected{% endif %}>{{ question }}</option>{% endfor %}</select><span class="field-error" id="error-question_{{ slot }}">{{ errors.get('question_'~slot,'') }}</span>
+          </div>{{ field('answer_'~slot,'Answer '~slot,'password',maximum=50,hint='2–50 letters and single spaces. Answers are case-insensitive.') }}{% endfor %}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend><span>04</span> Make your journal yours</legend>
+        <div class="field-grid">{{ field('display_name','Journal Display Name',value=data.get('display_name',''),maximum=30) }}
+          {{ field('journal_start','Journaling Start Date','date',value=data.get('journal_start',today),maximum=today) }}
+          {{ field('writing_goal','Writing Goal','select',value=data.get('writing_goal',''),options=goals) }}
+        </div>{{ field('intention','Private Journaling Intention','textarea',value=data.get('intention',''),maximum=300,hint='10–300 characters. Only you can view this intention after log-in.') }}
+      </fieldset>
+      <fieldset>
+        <legend><span>05</span> One last security check</legend>{{ captcha(errors) }}<label class="check-label consent"><input type="checkbox" id="consent" name="consent" value="1" required> <span>I have read the <a href="{{ url_for('web.privacy') }}" target="_blank" rel="noopener">Privacy Notice</a> and agree to the collection and processing of my personal data in accordance with the Data Privacy Act of 2012 (RA 10173). <span class="required">*</span></span></label><span class="field-error" id="error-consent">{{ errors.get('consent','') }}</span>
+      </fieldset>
+      <div class="wizard-actions"><button type="button" id="previous-step" hidden>Back</button><button type="button" id="next-step" hidden>Next →</button><button class="wide" type="submit">Create account &amp; verify email <span aria-hidden="true">→</span></button>
+      </div>
+      <p class="hint">Your account opens after email verification. Your password stays in this page while form errors are corrected.</p>
+    </form>
+  </div>
+</div>
 {% endblock %}

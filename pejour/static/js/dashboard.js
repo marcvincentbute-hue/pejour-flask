@@ -1,16 +1,144 @@
 'use strict';
-const filters=document.querySelector('#event-filters');const statusLabel=document.querySelector('#refresh-status');let chart;let loading=false;
-function cell(row,value){const item=document.createElement('td');item.textContent=value??'—';row.append(item);}
-function table(id,rows,columns){const body=document.getElementById(id);body.replaceChildren();if(!rows.length){const row=document.createElement('tr');const td=document.createElement('td');td.colSpan=columns.length;td.textContent='No matching events.';row.append(td);body.append(row);return;}for(const data of rows){const row=document.createElement('tr');for(const column of columns)cell(row,data[column]);body.append(row);}}
-async function refresh(){if(loading)return;loading=true;
-try{const response=await fetch('/dashboard-data?'+new URLSearchParams(new FormData(filters)),{cache:'no-store',credentials:'same-origin'});
-if(response.status===401){document.querySelector('#main').replaceChildren();location.replace('/login');return;}if(response.status===403){document.querySelector('#main').textContent='Access denied';return;}
-const data=await response.json();if(!response.ok)throw new Error(data.error||'Data could not be loaded.');
-const cards=document.querySelector('#summary-cards');cards.replaceChildren();for(const [name,value]of data.cards){const card=document.createElement('article');card.className='metric';const label=document.createElement('span');label.textContent=name;const number=document.createElement('strong');number.textContent=value;card.append(label,number);cards.append(card);}
-const ips=document.querySelector('#top-ips');ips.replaceChildren();if(!data.top.length)ips.textContent='No failed log-ins in the last 24 hours.';for(const ip of data.top){const row=document.createElement('div');row.className='ip-row';const group=document.createElement('div');const title=document.createElement('strong');title.textContent=ip.ip_address;const detail=document.createElement('small');detail.textContent=ip.failures+' failures';group.append(title,detail);const state=document.createElement('span');state.className='pill';state.textContent=ip.blocked?'Blocked':'Not blocked';row.append(group,state);ips.append(row);}
-table('flags-body',data.flags,['severity','pattern','target','details','created_at']);table('events-body',data.events,['created_at','event_type','username_typed','ip_address','user_agent','details']);
-if(chart){chart.data.labels=data.chart.labels;chart.data.datasets[0].data=data.chart.values;chart.update('none');}
-else chart=new Chart(document.querySelector('#failures-chart'),{type:'bar',data:{labels:data.chart.labels,datasets:[{label:'Failed log-ins',data:data.chart.values,backgroundColor:'#138794',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8,color:'#54776a',font:{size:10}}},y:{beginAtZero:true,ticks:{precision:0,color:'#54776a'},grid:{color:'#bdd3ca66'}}}}});
-statusLabel.textContent='Updated '+data.updated;}
-catch(error){statusLabel.textContent=error.message||'Connection unavailable. Retrying shortly.';}finally{loading=false;}}
-filters.addEventListener('submit',event=>{event.preventDefault();refresh();});filters.addEventListener('reset',()=>setTimeout(refresh,0));document.querySelector('#refresh-dashboard').addEventListener('click',refresh);refresh();setInterval(refresh,60000);
+
+const filters = document.querySelector('#event-filters');
+const statusLabel = document.querySelector('#refresh-status');
+let chart;
+let loading = false;
+function cell(row, value) {
+  const item = document.createElement('td');
+  item.textContent = value ?? '—';
+  row.append(item);
+}
+function table(id, rows, columns) {
+  const body = document.getElementById(id);
+  body.replaceChildren();
+  if (!rows.length) {
+    const row = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = columns.length;
+    td.textContent = 'No matching events.';
+    row.append(td);
+    body.append(row);
+    return;
+  }
+  for (const data of rows) {
+    const row = document.createElement('tr');
+    for (const column of columns) cell(row, data[column]);
+    body.append(row);
+  }
+}
+async function refresh() {
+  if (loading) return;
+  loading = true;
+  try {
+    const response = await fetch('/dashboard-data?' + new URLSearchParams(new FormData(filters)), {
+      cache: 'no-store',
+      credentials: 'same-origin'
+    });
+    if (response.status === 401) {
+      document.querySelector('#main').replaceChildren();
+      location.replace('/login');
+      return;
+    }
+    if (response.status === 403) {
+      document.querySelector('#main').textContent = 'Access denied';
+      return;
+    }
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Data could not be loaded.');
+    const cards = document.querySelector('#summary-cards');
+    cards.replaceChildren();
+    for (const [name, value] of data.cards) {
+      const card = document.createElement('article');
+      card.className = 'metric';
+      const label = document.createElement('span');
+      label.textContent = name;
+      const number = document.createElement('strong');
+      number.textContent = value;
+      card.append(label, number);
+      cards.append(card);
+    }
+    const ips = document.querySelector('#top-ips');
+    ips.replaceChildren();
+    if (!data.top.length) ips.textContent = 'No failed log-ins in the last 24 hours.';
+    for (const ip of data.top) {
+      const row = document.createElement('div');
+      row.className = 'ip-row';
+      const group = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = ip.ip_address;
+      const detail = document.createElement('small');
+      detail.textContent = ip.failures + ' failures';
+      group.append(title, detail);
+      const state = document.createElement('span');
+      state.className = 'pill';
+      state.textContent = ip.blocked ? 'Blocked' : 'Not blocked';
+      row.append(group, state);
+      ips.append(row);
+    }
+    table('flags-body', data.flags, ['severity', 'pattern', 'target', 'details', 'created_at']);
+    table('events-body', data.events, ['created_at', 'event_type', 'username_typed', 'ip_address', 'user_agent', 'details']);
+    if (chart) {
+      chart.data.labels = data.chart.labels;
+      chart.data.datasets[0].data = data.chart.values;
+      chart.update('none');
+    } else chart = new Chart(document.querySelector('#failures-chart'), {
+      type: 'bar',
+      data: {
+        labels: data.chart.labels,
+        datasets: [{
+          label: 'Failed log-ins',
+          data: data.chart.values,
+          backgroundColor: '#138794',
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              maxTicksLimit: 8,
+              color: '#54776a',
+              font: {
+                size: 10
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+              color: '#54776a'
+            },
+            grid: {
+              color: '#bdd3ca66'
+            }
+          }
+        }
+      }
+    });
+    statusLabel.textContent = 'Updated ' + data.updated;
+  } catch (error) {
+    statusLabel.textContent = error.message || 'Connection unavailable. Retrying shortly.';
+  } finally {
+    loading = false;
+  }
+}
+filters.addEventListener('submit', event => {
+  event.preventDefault();
+  refresh();
+});
+filters.addEventListener('reset', () => setTimeout(refresh, 0));
+document.querySelector('#refresh-dashboard').addEventListener('click', refresh);
+refresh();
+setInterval(refresh, 60000);

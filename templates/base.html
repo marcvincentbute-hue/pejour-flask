@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf }}">
+
+  <title>{{ title }} | Pejour</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+
+  {% block scripts %}{% endblock %}
+</head>
+
+<body {% if user %}data-authenticated="true" data-idle-seconds="{{ idle_seconds }}"{% endif %}>
+
+  {# Shared account menus for desktop and mobile. #}
+  {% macro account_menus(user) %}
+    {% for endpoint, label in [('web.my_account', 'My account'), ('web.settings_page', 'Settings')] %}
+      <a href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} class="active" aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  {% endmacro %}
+
+  <div class="app-shell {% if not user %}public-shell{% endif %}">
+    {% if user %}
+      <aside class="sidebar">
+        <a class="brand" href="{{ url_for('web.account_page') }}">
+          pejour<span>.</span>
+        </a>
+
+        <p class="sidebar-caption">A LITTLE SPACE FOR YOU</p>
+
+        <nav aria-label="Journal navigation">
+          <a href="{{ url_for('web.account_page') }}"
+             class="{% if request.endpoint == 'web.account_page' %}active{% endif %}">
+            Overview
+          </a>
+
+          <a href="{{ url_for('web.journal') }}"
+             class="{% if request.endpoint == 'web.journal' %}active{% endif %}">
+            My journal
+          </a>
+
+          <a href="{{ url_for('web.journal_edit') }}"
+             class="{% if request.endpoint == 'web.journal_edit' %}active{% endif %}">
+            Write an entry
+          </a>
+
+          {% if user.role == 'admin' %}
+            <a href="{{ url_for('web.dashboard') }}"
+               class="{% if request.endpoint == 'web.dashboard' %}active{% endif %}">
+              Security monitor
+            </a>
+          {% endif %}
+
+          {{ account_menus(user) }}
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="eyebrow">JUST BETWEEN US</span>
+          <p>Your words deserve a private place.</p>
+          <small>Journal content is encrypted at rest.</small>
+        </div>
+
+        <div class="identity">
+          <span class="avatar">{{ user.profile.display_name[:1] }}</span>
+          <div>
+            <strong>{{ user.profile.display_name }}</strong>
+            <small>{{ 'Administrator' if user.role == 'admin' else 'Personal account' }}</small>
+          </div>
+        </div>
+      </aside>
+    {% endif %}
+
+    <div class="workspace">
+      {% if not user %}<div class="prospect">Personal Journal</div>{% endif %}
+
+      <header class="topbar">
+        {% if user %}
+          <span class="prospect">Personal Journal</span>
+        {% else %}
+          <a class="brand" href="{{ url_for('web.home') }}">pejour<span>.</span></a>
+        {% endif %}
+
+        <nav aria-label="Main navigation">
+          <a href="{{ url_for('web.home') }}">Home</a>
+
+          {% if user %}
+            <form action="{{ url_for('web.logout') }}" method="post">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button class="nav-button" type="submit">Log-out</button>
+            </form>
+          {% else %}
+            {% if request.endpoint != 'web.register' %}
+              <a href="{{ url_for('web.register') }}">Register</a>
+            {% endif %}
+
+            {% if request.endpoint != 'web.login' %}
+              <a href="{{ url_for('web.login') }}">Log-in</a>
+            {% endif %}
+          {% endif %}
+        </nav>
+      </header>
+
+      {% if user %}
+        <nav class="mobile-nav" aria-label="Journal navigation">
+          <a href="{{ url_for('web.account_page') }}">Overview</a>
+          <a href="{{ url_for('web.journal') }}">My journal</a>
+          <a href="{{ url_for('web.journal_edit') }}">Write an entry</a>
+
+          {% if user.role == 'admin' %}
+            <a href="{{ url_for('web.dashboard') }}">Security monitor</a>
+          {% endif %}
+
+          {{ account_menus(user) }}
+        </nav>
+      {% endif %}
+
+      <main id="main">
+        {% if notice %}
+          <div class="notice" role="status">{{ notice }}</div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer>
+        © 2026 Pejour Student Project. All rights reserved.
+        <a href="{{ url_for('web.privacy') }}">Privacy Notice</a>
+      </footer>
+    </div>
+  </div>
+
+  {% if user %}
+    <dialog id="idle-warning">
+      <span class="eyebrow">STILL HERE?</span>
+      <h2>Your private space is about to close.</h2>
+      <p>
+        You will be logged out in
+        <strong id="idle-seconds">60</strong> seconds due to inactivity.
+      </p>
+      <button type="button" id="stay-active">Stay logged in</button>
+    </dialog>
+  {% endif %}
+
+</body>
+</html>

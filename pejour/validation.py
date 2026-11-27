@@ -142,8 +142,8 @@ def registration_errors(data):
     )
     check(
         'password',
-        strength(data.get('password', '')) != 'Weak',
-        f'Use {PASSWORD_MIN}–64 characters, at least three character groups, and no whitespace.'
+        strength(data.get('password', '')) != 'Strong',
+        'Use 14-64 characters with uppercase, lowercase, a number, and a symbol. No spaces.'
     )
     check(
         'password_confirm',

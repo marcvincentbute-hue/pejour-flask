@@ -11,7 +11,6 @@ from flask import current_app, g, request
 from psycopg.types.json import Jsonb
 from .db import execute, one, lock
 from .settings import IDLE_SECONDS
-
 PHT = ZoneInfo('Asia/Manila')
 HASHER = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=1)
 DUMMY_HASH = HASHER.hash(secrets.token_urlsafe(24))
@@ -43,8 +42,10 @@ def decrypt(value, context):
     return AESGCM(key).decrypt(data[:12], data[28:] + data[12:28], context.encode()).decode()
 
 def audit(event, username=None, user_id=None, details=''):
-    execute('INSERT INTO activity_log(event_type,username_typed,user_id,ip_address,user_agent,details) VALUES(%s,%s,%s,%s,%s,%s)',
-            (event, (username or '')[:256], user_id, request.remote_addr or 'unknown', request.headers.get('User-Agent','')[:500], details[:1000]))
+    execute(
+        'INSERT INTO activity_log(event_type,username_typed,user_id,ip_address,user_agent,details) VALUES(%s,%s,%s,%s,%s,%s)',
+        (event, (username or '')[:256], user_id, request.remote_addr or 'unknown', request.headers.get('User-Agent', '')[:500], details[:1000])
+    )
 
 def load_session():
     token = request.cookies.get('pejour_session', '')
@@ -80,18 +81,27 @@ def save_session(response):
     auth = g.session.get('auth')
     if auth:
         expires = datetime.fromtimestamp(auth['last_activity'] + IDLE_SECONDS, timezone.utc)
-    execute('INSERT INTO web_sessions(token_hash,data,expires_at) VALUES(%s,%s,%s) ON CONFLICT(token_hash) DO UPDATE SET data=EXCLUDED.data,expires_at=EXCLUDED.expires_at',
-            (g.token_hash, Jsonb(g.session), expires))
-    response.set_cookie('pejour_session', g.token, httponly=True, secure=current_app.config['COOKIE_SECURE'], samesite='Lax', path='/')
+    execute(
+        'INSERT INTO web_sessions(token_hash,data,expires_at) VALUES(%s,%s,%s) ON CONFLICT(token_hash) DO UPDATE SET data=EXCLUDED.data,expires_at=EXCLUDED.expires_at',
+        (g.token_hash, Jsonb(g.session), expires)
+    )
+    response.set_cookie(
+        'pejour_session',
+        g.token,
+        httponly=True,
+        secure=current_app.config['COOKIE_SECURE'],
+        samesite='Lax',
+        path='/'
+    )
     return response
 
 def csrf_valid():
     supplied = request.form.get('csrf', '') or request.headers.get('X-CSRF-Token', '')
-    return bool(supplied) and hmac.compare_digest(supplied, g.session.get('csrf',''))
+    return bool(supplied) and hmac.compare_digest(supplied, g.session.get('csrf', ''))
 
 def captcha_valid():
     expected = g.session.pop('captcha', '')
-    answer = request.form.get('captcha','').upper()
+    answer = request.form.get('captcha', '').upper()
     actual = hashlib.sha256(answer.encode()).hexdigest()
     valid = bool(expected) and hmac.compare_digest(expected, actual)
     if not valid:

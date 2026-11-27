@@ -274,3 +274,63 @@
     margin: 0;
   }
 }
+@media (min-width: 751px) {
+  body:has(.recovery-layout) {
+    display: flow-root;
+  }
+
+  .public-shell:has(.recovery-layout) {
+    box-sizing: border-box;
+    width: min(1080px, calc(100% - 40px));
+    height: min(580px, calc(100dvh - 32px));
+    min-height: 0;
+    margin: max(16px, calc((100dvh - 580px) / 2)) auto;
+  }
+
+  .recovery-layout {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: 6px 0;
+  }
+
+  .recovery-layout .form-card {
+    box-sizing: border-box;
+    width: min(100%, 520px);
+    margin: 0;
+    padding: 16px 20px;
+  }
+
+  .recovery-layout .captcha-block {
+    margin: 8px 0;
+    padding-top: 8px;
+  }
+
+  .recovery-layout .captcha-row {
+    margin: 0 0 6px;
+  }
+}
+
+.login-toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1000;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #183e39;
+  color: white;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 18%);
+  font-size: 14px;
+  pointer-events: none;
+  animation: login-toast-hide 0.25s ease-out 3.75s forwards;
+}
+
+@keyframes login-toast-hide {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

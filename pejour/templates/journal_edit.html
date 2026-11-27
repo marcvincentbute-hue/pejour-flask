@@ -1,2 +1,18 @@
-{% extends 'base.html' %}{% from 'macros.html' import field,csrf_field,form_error with context %}
-{% block content %}<div class="page-heading"><span class="eyebrow">A MOMENT OF REFLECTION</span><h1>{{ title }}</h1><p>{% if user.profile.writing_goal=='Gratitude' %}What are three small things you feel grateful for?{% elif user.profile.writing_goal=='Personal Growth' %}What did you learn about yourself today?{% elif user.profile.writing_goal=='Daily Memories' %}Which moment from today would you like to keep?{% else %}What is on your mind, and what might it be telling you?{% endif %}</p></div><div class="form-card editor-card">{{ form_error(errors) }}<form method="post">{{ csrf_field() }}{% if entry %}<input type="hidden" name="version" value="{{ data.get('version',entry.version) }}">{% endif %}{{ field('title','Title',value=data.get('title',''),maximum=120,placeholder='Give this moment a name') }}<div class="field-grid">{{ field('entry_date','Entry Date','date',value=data.get('entry_date',today),minimum=user.profile.journal_start,maximum=today) }}{{ field('mood','How are you feeling?','select',value=data.get('mood',''),options=moods) }}</div>{{ field('body','Your Entry','textarea',value=data.get('body',''),maximum=10000,hint='Private and encrypted. Up to 10,000 characters.') }}<div class="actions"><button type="submit">Save entry</button><a href="{{ url_for('web.journal') }}">Cancel</a></div></form></div>{% endblock %}
+{% extends 'base.html' %}
+{% from 'macros.html' import field,csrf_field,form_error with context %}
+{% block content %}
+<div class="page-heading"><span class="eyebrow">A MOMENT OF REFLECTION</span>
+  <h1>{{ title }}
+  </h1>
+  <p>{% if user.profile.writing_goal=='Gratitude' %}What are three small things you feel grateful for?{% elif user.profile.writing_goal=='Personal Growth' %}What did you learn about yourself today?{% elif user.profile.writing_goal=='Daily Memories' %}Which moment from today would you like to keep?{% else %}What is on your mind, and what might it be telling you?{% endif %}
+  </p>
+</div>
+<div class="form-card editor-card">{{ form_error(errors) }}
+  <form method="post">{{ csrf_field() }}{% if entry %}<input type="hidden" name="version" value="{{ data.get('version',entry.version) }}">{% endif %}{{ field('title','Title',value=data.get('title',''),maximum=120,placeholder='Give this moment a name') }}
+    <div class="field-grid">{{ field('entry_date','Entry Date','date',value=data.get('entry_date',today),minimum=user.profile.journal_start,maximum=today) }}
+      {{ field('mood','How are you feeling?','select',value=data.get('mood',''),options=moods) }}
+    </div>{{ field('body','Your Entry','textarea',value=data.get('body',''),maximum=10000,hint='Private and encrypted. Up to 10,000 characters.') }}
+    <div class="actions"><button type="submit">Save entry</button><button type="submit" name="action" value="draft" formnovalidate class="text-button">Save draft</button><a href="{{ url_for('web.journal') }}">Cancel</a>
+    </div>
+  </form>
+</div>{% endblock %}

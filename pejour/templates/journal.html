@@ -8,9 +8,9 @@
 </div>
 {% if entries %}
 <div class="journal-grid">{% for entry in entries %}<article class="glass journal-entry">
-  <div class="card-top"><time>{{ entry.entry_date }}</time><span class="pill">{{ entry.mood }}</span>
+  <div class="card-top"><time>{{ entry.entry_date }}</time><span class="pill">{% if entry.is_draft %}Draft{% if entry.mood %} · {% endif %}{% endif %}{{ entry.mood }}</span>
   </div>
-  <h2>{{ entry.title }}
+  <h2>{{ entry.title or 'Untitled draft' }}
   </h2>
   <p class="journal-body">{{ entry.body }}</p>
   <div class="entry-actions"><a href="{{ url_for('web.journal_edit',entry_id=entry.id) }}">Edit entry</a><details><summary>Delete</summary>

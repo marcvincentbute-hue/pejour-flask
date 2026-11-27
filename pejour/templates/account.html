@@ -4,7 +4,46 @@
   <span class="eyebrow">Overview</span>
   <h1>Welcome back, {{ user.profile.display_name }}.</h1>
 </div>
+<div class="overview-layout">
+<div class="overview-main">
 <div class="overview-grid">
+  {% if draft %}
+  <section class="write-card">
+    <div style="min-width:0;overflow-wrap:anywhere">
+      <span class="eyebrow">Latest draft · {{ draft.entry_date }}</span>
+      {% if show_preview %}<h2>{{ draft.title or 'Untitled draft' }}</h2>
+      {% if draft.preview %}<p>{{ draft.preview|truncate(120) }}</p>{% endif %}{% endif %}
+    </div>
+    <div class="actions">
+      <a class="button light-button" href="{{ url_for('web.journal_edit', entry_id=draft.id) }}">Continue Writing →</a>
+      <a class="button light-button" href="{{ url_for('web.journal_edit') }}">New entry</a>
+    </div>
+  </section>
+  {% else %}
+  <section class="write-card">
+    <div>
+      <h2>What is on your mind today?</h2>
+      <p>Start with a sentence. See where it takes you.</p>
+    </div><a class="button light-button" href="{{ url_for('web.journal_edit') }}">Write an entry →</a>
+  </section>
+  {% endif %}
+</div>
+<div class="section-heading">
+  <div>
+    <h2>{{ 'Recent reflections' if show_preview else 'Recent saved entries' }}</h2>
+  </div><a href="{{ url_for('web.journal') }}">View all entries →</a>
+</div>
+{% if entries %}
+<div class="entry-grid">{% for entry in entries %}<a class="glass entry-preview" href="{{ url_for('web.journal_edit',entry_id=entry.id) }}"><span class="pill">{% if entry.is_draft %}Draft{% if entry.mood %} · {% endif %}{% endif %}{{ entry.mood }}</span>
+  <h3>{{ entry.title or 'Untitled draft' }}
+  </h3><small>{{ entry.entry_date }}</small></a>{% endfor %}
+</div>{% else %}
+<div class="glass empty-state">
+  {% if count and not show_preview %}<p>Your completed entries will appear here.</p>{% else %}<h3>Your first page is waiting.</h3>
+  <p>No perfect words needed. Begin with what feels true today.</p><a href="{{ url_for('web.journal_edit') }}">Write your first entry →</a>{% endif %}
+</div>{% endif %}
+</div>
+<aside class="overview-details" aria-label="Journal details">
   <section class="glass intention-card">
     <div class="card-top"><span class="eyebrow">Journal intention</span><span class="pill">Encrypted</span>
     </div>
@@ -18,25 +57,6 @@
     <p>{{ user.profile.writing_goal }}<br><small>Since {{ user.profile.journal_start }}</small>
     </p>
   </section>
-  <section class="write-card">
-    <div>
-      <h2>What is on your mind today?</h2>
-      <p>Start with a sentence. See where it takes you.</p>
-    </div><a class="button light-button" href="{{ url_for('web.journal_edit') }}">Write an entry →</a>
-  </section>
+</aside>
 </div>
-<div class="section-heading">
-  <div>
-    <h2>Recent reflections</h2>
-  </div><a href="{{ url_for('web.journal') }}">View all entries →</a>
-</div>
-{% if entries %}
-<div class="entry-grid">{% for entry in entries %}<a class="glass entry-preview" href="{{ url_for('web.journal_edit',entry_id=entry.id) }}"><span class="pill">{{ entry.mood }}</span>
-  <h3>{{ entry.title }}
-  </h3><small>{{ entry.entry_date }}</small></a>{% endfor %}
-</div>{% else %}
-<div class="glass empty-state">
-  <h3>Your first page is waiting.</h3>
-  <p>No perfect words needed. Begin with what feels true today.</p><a href="{{ url_for('web.journal_edit') }}">Write your first entry →</a>
-</div>{% endif %}
 {% endblock %}

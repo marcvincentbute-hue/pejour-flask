@@ -1,1 +1,10 @@
-{% extends 'base.html' %}{% block content %}<section class="centered"><div class="form-card"><span class="eyebrow">PEJOUR</span><h1>{{ title }}</h1><p>{{ message }}</p><a class="button" href="{{ url_for('web.home') }}">Return Home</a></div></section>{% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<section class="centered">
+  <div class="form-card"><span class="eyebrow">PEJOUR</span>
+    <h1>{{ title }}
+    </h1>
+    <p>{{ message }}
+    </p><a class="button" href="{{ url_for('web.home') }}">Return Home</a>
+  </div>
+</section>{% endblock %}

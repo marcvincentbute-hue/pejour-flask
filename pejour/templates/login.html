@@ -1,12 +1,66 @@
-{% extends 'base.html' %}{% from 'macros.html' import field,captcha,password_tools,csrf_field,form_error with context %}
+{% extends 'base.html' %}
+{% from 'macros.html' import field, captcha, password_tools, csrf_field, form_error with context %}
+
+{% block scripts %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/public-pages.css') }}">
+{% endblock %}
+
 {% block content %}
-<section class="auth-layout"><div class="auth-intro"><span class="eyebrow">A FAMILIAR, QUIET PLACE</span><h1>Welcome<br>back to <em>yourself.</em></h1><p>Your thoughts are right where you left them. Take a breath and make a little room for today.</p><div class="intro-note"><span class="eyebrow">YOUR NEXT LITTLE STEP</span><p>What would you like to remember about today?</p></div></div>
-<div class="form-card"><span class="eyebrow">YOUR PRIVATE JOURNAL</span><h2>Welcome back</h2><p>Log in to continue your story.</p>{{ form_error(errors) }}
-<form method="post" id="login-form" data-lock-seconds="{{ seconds }}">{{ csrf_field() }}
-{{ field('username','Username',value=data.get('username',''),maximum=256) }}{{ field('password','Password','password',maximum=64) }}{{ password_tools() }}{{ captcha(errors) }}
-<p class="lock-message" role="status" {% if not seconds %}hidden{% endif %}>Please wait <strong data-lock-count>{{ seconds }}</strong> seconds before trying again.</p>
-<button class="wide" type="submit" data-lock-control {% if seconds %}disabled{% endif %}>Log-in <span aria-hidden="true">→</span></button>
-{% if failures>=forgot_after %}<a class="forgot-link" href="{{ url_for('web.forgot') }}">Forgot Password? Reset Here</a>{% endif %}
-<p class="form-bottom">New to Pejour? <a data-lock-control href="{{ url_for('web.register') }}" {% if seconds %}aria-disabled="true" tabindex="-1"{% endif %}>Please register here</a></p>
-</form></div></section>
+<section class="auth-layout">
+  <div class="auth-intro">
+    <span class="eyebrow">A FAMILIAR, QUIET PLACE</span>
+    <h1>Welcome<br>back to <em>yourself.</em></h1>
+    <p>Your thoughts are right where you left them. Take a breath and make a little room for today.</p>
+
+    <div class="intro-note">
+      <span class="eyebrow">YOUR NEXT LITTLE STEP</span>
+      <p>What would you like to remember about today?</p>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <span class="eyebrow">YOUR PRIVATE JOURNAL</span>
+    <h2>Welcome back</h2>
+    <p>Log in to continue your story.</p>
+
+    {{ form_error(errors) }}
+
+    {% if failures > 0 %}
+      <p class="attempt-count">
+        Failed login attempts: <strong>{{ failures }}</strong>
+      </p>
+
+      {% if errors.get('_form') == 'Invalid username or password.' %}
+        <div class="login-toast" role="status">
+          Failed login attempts: <strong>{{ failures }}</strong>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    <form method="post" id="login-form" data-lock-seconds="{{ seconds }}">
+      {{ csrf_field() }}
+      {{ field('username', 'Username', value=data.get('username', ''), maximum=256) }}
+      {{ field('password', 'Password', 'password', maximum=64) }}
+      {{ password_tools() }}
+      {{ captcha(errors) }}
+
+      <p class="lock-message" role="status" {% if not seconds %}hidden{% endif %}>
+        Please wait <strong data-lock-count>{{ seconds }}</strong> seconds before trying again.
+      </p>
+
+      <button class="wide" type="submit" data-lock-control {% if seconds %}disabled{% endif %}>
+        Log-in <span aria-hidden="true">→</span>
+      </button>
+
+      <p class="form-bottom">
+        <a href="{{ url_for('web.forgot') }}">Forgot password?</a>
+        <span aria-hidden="true"> · </span>
+        New to Pejour?
+        <a href="{{ url_for('web.register') }}"
+           data-lock-control
+           {% if seconds %}aria-disabled="true" tabindex="-1"{% endif %}>Please register here</a>
+      </p>
+    </form>
+  </div>
+</section>
 {% endblock %}

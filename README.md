@@ -36,10 +36,6 @@ If PowerShell blocks a script, use `powershell -ExecutionPolicy Bypass -File .\s
 
 The admin is created only through the terminal and uses the normal email OTP login. No default admin password exists. Register two user accounts with real inboxes separately. The Security monitor link appears for admins. The monitor scans 24 hours and writes deduplicated PHT-day flags. Run it manually in the demo; see `docs/design-decisions.md` for Windows Task Scheduler.
 
-## Existing PHP accounts
-
-This is a **separate database**. It starts with no accounts. Your original accounts remain in MySQL and cannot log in here until re-registered or explicitly migrated. Nothing deletes or automatically copies your real personal data or SMTP secrets. `scripts/migrate_mysql.py` provides an optional one-way, transaction-protected import from the previous Pejour schema; read `docs/migration.md` before using it. It preserves password hashes and encrypted payloads when the original encryption key is configured. Back up first.
-
 ## Project map
 
 | File/folder | Purpose |

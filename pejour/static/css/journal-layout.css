@@ -132,3 +132,108 @@ html[data-theme="dark"] .workspace .button:not(.light-button) { color: white; }
 .theme-switch[aria-checked="true"] .theme-track { background: #077a79; }
 .theme-switch[aria-checked="true"] .theme-track::before { transform: translateX(16px); }
 #theme-form [role="status"]:not(:empty) { display: block; margin-top: 6px; }
+
+/* Book-sized desktop frame and the journal's compact mobile navigation. */
+.pejour-layout body { margin: 0; padding: 0; }
+.pejour-layout body .app-shell.app-shell {
+  --gutter: clamp(16px, 2.3vw, 28px);
+  width: min(1240px, calc(100% - 48px)); max-width: none;
+  min-height: calc(100dvh - 48px); height: auto; margin: 24px auto;
+  grid-template: auto / 200px minmax(0,1fr); border-radius: 24px;
+}
+.pejour-layout body .app-shell.public-shell { grid-template-columns: minmax(0,1fr); }
+.pejour-layout body .app-shell .workspace { display: flex; flex-direction: column; min-width: 0; padding: 0; }
+.pejour-layout body .app-shell .sidebar {
+  display: flex; align-self: stretch; width: auto; height: auto; min-height: 0;
+  padding: 18px 13px; overflow: visible;
+}
+.pejour-layout .sidebar nav a { display: flex; align-items: center; min-height: 46px; padding: 0 14px; border-radius: 13px; font-size: 13.5px; }
+.pejour-layout body .workspace .topbar { flex: none; min-height: 82px; margin: 0; padding: 15px var(--gutter); }
+.pejour-layout body .workspace #main { display: block; flex: 1; min-width: 0; padding: 22px var(--gutter); overflow: visible; }
+.pejour-layout body .workspace footer { margin: auto 0 0; padding: 14px var(--gutter); }
+.pejour-layout .public-shell .workspace > .prospect { display: none; }
+.pejour-layout .workspace .page-heading h1 { font-size: clamp(26px, 2.5vw, 36px); }
+.pejour-layout .workspace :is(.glass,.form-card,.reflection-card,.write-card) { min-width: 0; overflow-wrap: anywhere; }
+.pejour-layout body .workspace :is(.glass,.write-card) { padding: 18px; border-radius: 18px; }
+.pejour-layout body .workspace :is(.form-card,.reflection-card) { padding: 24px; border-radius: 24px; height: auto; max-height: none; overflow: visible; }
+.pejour-layout body .workspace .form-card .field { margin-bottom: 12px; }
+.pejour-layout body .workspace .form-card :is(input:not([type=checkbox],[type=radio]),select,textarea) { min-height: 42px; max-width: 100%; padding: 9px 12px; font-size: 14px; }
+.pejour-layout body .workspace :is(.button,button:not(.nav-button,.theme-switch)) { min-height: 40px; padding: 8px 16px; font-size: 13px; border-radius: 13px; }
+.pejour-layout .overview-layout { display: grid; grid-template-columns: minmax(0,1fr) 310px; gap: 18px; align-items: start; }
+.pejour-layout .overview-details { display: grid; gap: 16px; }
+.pejour-layout .overview-main { min-width: 0; }
+.pejour-layout .overview-grid { display: block; }
+.pejour-layout .overview-main .entry-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(180px,100%),1fr)); gap: 12px; }
+.pejour-layout .overview-main .write-card { flex-wrap: wrap; }
+.pejour-layout .workspace .actions { flex-wrap: wrap; }
+.pejour-layout .workspace :is(.account-sections,.monitor-grid,.metric-grid,.field-grid) > * { min-width: 0; }
+.pejour-layout .workspace .account-sections dd { overflow-wrap: anywhere; }
+.pejour-layout .workspace .table-scroll { max-width: 100%; overflow: auto; }
+.pejour-layout .mobile-nav { display: none; }
+.pejour-layout[data-theme=dark] .workspace :is(.reflection-card,.form-card,.metric-card,.mobile-nav,.mobile-more > div) { background: var(--paper); color: var(--ink); }
+.pejour-layout[data-theme=dark] .workspace :is(.goal-card p,.entry-count span,.ruled-lines p,.trustline,.auth-intro li,.check-label,.lead,.card-bottom) { color: var(--muted); }
+.pejour-layout[data-theme=dark] .workspace .form-error { background: #482a35; color: #ffd4de; }
+.pejour-layout[data-theme=dark] .workspace :is(.text-button,.nav-button) { color: var(--accent); }
+@media(max-width:980px) {
+  .pejour-layout body .app-shell.app-shell { width: calc(100% - 28px); grid-template-columns: 190px minmax(0,1fr); margin: 14px auto; }
+  .pejour-layout body .app-shell.public-shell { grid-template-columns: minmax(0,1fr); }
+  .pejour-layout .overview-layout { grid-template-columns: minmax(0,1fr); }
+  .pejour-layout .overview-details { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:760px) {
+  .pejour-layout body .app-shell.app-shell { display: block; width: calc(100% - 14px); min-height: calc(100dvh - 14px); margin: 7px auto; border-radius: 19px; backdrop-filter: none; overflow: clip; }
+  .pejour-layout body .app-shell .sidebar { display: none; }
+  .pejour-layout body .workspace .topbar { min-height: 60px; padding: 10px 15px; }
+  .pejour-layout body .workspace #main { padding: 16px 14px; }
+  .pejour-layout body[data-authenticated] .workspace { padding-bottom: calc(62px + env(safe-area-inset-bottom)); }
+  .pejour-layout .workspace .mobile-nav {
+    display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); position: fixed;
+    inset: auto 0 0; z-index: 50; margin: 0; padding: 5px 8px calc(5px + env(safe-area-inset-bottom));
+    background: var(--paper); border-top: 1px solid var(--edge); overflow: visible;
+  }
+  .pejour-layout .mobile-nav :is(a,summary) { display: grid; place-items: center; min-height: 44px; padding: 4px; border-radius: 10px; background: transparent; color: inherit; font-size: 13px; text-align: center; cursor: pointer; }
+  .pejour-layout .mobile-nav a[aria-current] { background: #096976; color: white; }
+  .pejour-layout .mobile-more > div { position: absolute; right: 8px; bottom: 100%; width: 170px; padding: 6px; border: 1px solid var(--edge); border-radius: 14px; background: var(--paper); }
+  .pejour-layout body .workspace :is(.auth-layout,.hero,.monitor-grid,.account-sections) { grid-template-columns: minmax(0,1fr); }
+  .pejour-layout body .workspace :is(.form-card,.reflection-card) { padding: 18px; }
+  .pejour-layout body .workspace .form-card :is(input:not([type=checkbox],[type=radio]),select,textarea) { min-height: 44px; font-size: 16px; }
+}
+@media(max-width:520px) {
+  .pejour-layout .overview-details,.pejour-layout .workspace .field-grid { grid-template-columns: minmax(0,1fr); }
+  .pejour-layout body .workspace :is(.glass,.write-card) { padding: 14px; }
+}
+
+/* Auth screens use Novella's narrower two-panel frame. */
+@media(min-width:861px) {
+  .pejour-layout body .public-shell:has(.auth-layout) { width: min(1060px,calc(100% - 48px)); min-height: 670px; }
+  .pejour-layout body .public-shell .workspace .auth-layout {
+    display: grid; grid-template-columns: minmax(0,1.08fr) minmax(0,.92fr);
+    gap: clamp(20px,3vw,42px); align-items: center;
+  }
+}
+@media(max-width:860px) {
+  .pejour-layout body .public-shell .workspace .auth-layout { grid-template-columns: minmax(0,1fr); }
+}
+.pejour-layout body .public-shell .workspace .form-card :is(input:not([type=checkbox],[type=radio]),select) { min-height: 46px; border-radius: 12px; }
+.pejour-layout[data-theme=dark] .workspace :is(.metric,.metric:nth-child(n),#previous-step,legend span) { background: var(--paper); color: var(--ink); border-color: var(--edge); }
+.pejour-layout[data-theme=dark] .workspace .metric span { color: var(--muted); }
+.pejour-layout body .mobile-nav .mobile-more div a { color: var(--ink); }
+
+/* Account preferences */
+.settings-panel section + section { border-top: 1px solid var(--edge); margin-top: 16px; padding-top: 20px; }
+.settings-panel h2 { margin: 0 0 8px; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; padding-block: 8px; }
+.setting-row p { margin: 0; color: var(--muted); }
+.setting-controls { display: flex; align-items: center; gap: 8px; }
+.setting-controls select { width: auto; padding: 8px 12px; }
+.settings-panel .theme-switch { min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; background: transparent; box-shadow: none; padding: 0; }
+.pejour-layout { --journal-font: 17px; }
+.pejour-layout[data-journal-size=small], .size-setting:has(option[value=small]:checked) { --journal-font: 16px; }
+.pejour-layout[data-journal-size=large], .size-setting:has(option[value=large]:checked) { --journal-font: 21px; }
+.size-setting:has(option[value=default]:checked) { --journal-font: 17px; }
+.pejour-layout body .workspace .editor-card textarea#body,
+.pejour-layout .workspace .journal-body,
+.pejour-layout .workspace .size-sample { font-size: var(--journal-font); line-height: 1.6; }
+@media(max-width:600px) {
+  .setting-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+}

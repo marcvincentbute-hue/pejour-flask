@@ -1,31 +1,53 @@
 {% extends 'base.html' %}
+{% from 'macros.html' import csrf_field with context %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/theme-switch.js') }}" defer></script>
 {% endblock %}
 {% block content %}
 <div class="page-heading"><h1>Settings</h1></div>
-<div class="account-sections">
-  <section class="glass">
+<div class="glass settings-panel">
+  <section>
     <h2>Appearance</h2>
-    {% set dark = user.profile.get('theme') == 'dark' %}
-    <form id="theme-form" method="post" action="{{ url_for('web.settings_page') }}">
-      <input type="hidden" name="csrf" value="{{ csrf }}">
-      <input type="hidden" name="theme" value="{{ 'light' if dark else 'dark' }}">
-      <button class="theme-switch" type="submit" role="switch" aria-checked="{{ 'true' if dark else 'false' }}">
-        Dark mode <span class="theme-track" aria-hidden="true"></span>
-      </button>
-      <small role="status" aria-live="polite"></small>
+    <div class="setting-row">
+      <span id="dark-label">Dark mode</span>
+      {% set dark = user.profile.get('theme') != 'light' %}
+      <form id="theme-form" method="post">
+        {{ csrf_field() }}
+        <input type="hidden" name="theme" value="{{ 'light' if dark else 'dark' }}">
+        <button class="theme-switch" type="submit" role="switch" aria-labelledby="dark-label" aria-checked="{{ 'true' if dark else 'false' }}"><span class="theme-track" aria-hidden="true"></span></button>
+        <small role="status"></small>
+      </form>
+    </div>
+    <form class="setting-row size-setting" method="post">
+      {{ csrf_field() }}
+      <div><label for="journal-size">Journal text size</label>
+        <p class="size-sample">Today I found a moment to write.</p>
+      </div>
+      <div class="setting-controls">
+        <select id="journal-size" name="journal_text_size">
+          {% for size in ['small','default','large'] %}
+          <option value="{{ size }}"{% if user.profile.get('journal_text_size','default') == size %} selected{% endif %}>{{ size|capitalize }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Save size</button>
+      </div>
     </form>
   </section>
-  <section class="glass">
+  <section>
     <h2>Password recovery</h2>
-    <p>Verify your identity to choose a new password.</p>
-    <a class="button" href="{{ url_for('web.forgot') }}">Reset password</a>
+    <div class="setting-row"><p>Verify your identity to choose a new password.</p><a class="button" href="{{ url_for('web.forgot') }}">Reset password</a></div>
   </section>
-  <section class="glass">
+  <section>
     <h2>Privacy and session</h2>
-    <p>Your session closes after {{ idle_seconds // 60 }} minutes of inactivity.</p>
-    <a href="{{ url_for('web.privacy') }}">Read the Privacy Notice</a>
+    <div class="setting-row">
+      <div><strong id="preview-label">Show draft preview on Overview</strong><p>Show draft titles and a snippet from your latest draft.</p></div>
+      {% set show = user.profile.get('show_draft_preview',true) %}
+      <form method="post">
+        {{ csrf_field() }}
+        <button type="submit" class="theme-switch" name="show_draft_preview" value="{{ 'off' if show else 'on' }}" role="switch" aria-labelledby="preview-label" aria-checked="{{ 'true' if show else 'false' }}"><span class="theme-track" aria-hidden="true"></span></button>
+      </form>
+    </div>
+    <div class="setting-row"><p>Your session closes after {{ idle_seconds // 60 }} minutes of inactivity.</p><a href="{{ url_for('web.privacy') }}">Read the Privacy Notice</a></div>
   </section>
 </div>
 {% endblock %}

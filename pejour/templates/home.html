@@ -1,8 +1,26 @@
 {% extends 'base.html' %}
+{% block scripts %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/public-pages.css') }}">{% endblock %}
 {% block content %}
 <section class="hero">
-  <div><span class="eyebrow">PAUSE. REFLECT. BEGIN AGAIN.</span><h1>A little space<br>for your <em>inner world.</em></h1><p class="lead">Keep the moments, thoughts and small discoveries that make you, you. A private journal, made for a quieter kind of connection.</p><div class="actions"><a class="button" href="{{ url_for('web.register') }}">Start your journal <span aria-hidden="true">→</span></a><a class="text-button" href="{{ url_for('web.login') }}">I already have an account</a></div><div class="trustline">Email verification <span>·</span> Encrypted journal <span>·</span> Yours alone</div></div>
-  <div class="reflection-card"><div class="card-top"><span class="eyebrow">A MOMENT OF REFLECTION</span><span class="pill">Just for you</span></div><p class="reflection-quote">“What is one small thing that made today feel a little lighter?”</p><div class="ruled-lines"><p>A quiet morning. A good conversation.</p><p>A thought worth keeping.</p></div><div class="card-bottom"><span>Every little moment matters.</span><span class="seal">P</span></div></div>
+  <div><span class="eyebrow">PAUSE. REFLECT. BEGIN AGAIN.</span>
+    <h1>A little space<br>for your <em>inner world.</em>
+    </h1>
+    <p class="lead">Keep the moments, thoughts and small discoveries that make you, you. A private journal, made for a quieter kind of connection.</p>
+    <div class="actions"><a class="button" href="{{ url_for('web.register') }}">Start your journal <span aria-hidden="true">→</span></a><a class="text-button" href="{{ url_for('web.login') }}">I already have an account</a>
+    </div>
+    <div class="trustline">Email verification <span>·</span> Encrypted journal <span>·</span> Yours alone</div>
+  </div>
+  <div class="reflection-card">
+    <div class="card-top"><span class="eyebrow">A MOMENT OF REFLECTION</span><span class="pill">Just for you</span>
+    </div>
+    <p class="reflection-quote">“What is one small thing that made today feel a little lighter?”</p>
+    <div class="ruled-lines">
+      <p>A quiet morning. A good conversation.</p>
+      <p>A thought worth keeping.</p>
+    </div>
+    <div class="card-bottom"><span>Every little moment matters.</span><span class="seal">P</span>
+    </div>
+  </div>
 </section>
-<div class="feature-grid"><article class="glass"><span class="feature-number">01</span><h3>Your words, protected.</h3><p>AES-256 encryption keeps journal content private in the database.</p></article><article class="glass"><span class="feature-number lavender">02</span><h3>A thoughtful sign-in.</h3><p>Email codes add a second step before your private space opens.</p></article><article class="glass"><span class="feature-number peach">03</span><h3>A habit that feels like you.</h3><p>Choose a writing goal, notice your mood and reflect at your own pace.</p></article></div>
 {% endblock %}

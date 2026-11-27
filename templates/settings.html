@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><h1>Settings</h1></div>
+<div class="account-sections">
+  <section class="glass">
+    <h2>Password recovery</h2>
+    <p>Verify your identity to choose a new password.</p>
+    <a class="button" href="{{ url_for('web.forgot') }}">Reset password</a>
+  </section>
+  <section class="glass">
+    <h2>Privacy and session</h2>
+    <p>Your session closes after {{ idle_seconds // 60 }} minutes of inactivity.</p>
+    <a href="{{ url_for('web.privacy') }}">Read the Privacy Notice</a>
+  </section>
+</div>
+{% endblock %}

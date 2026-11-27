@@ -1,2 +1,34 @@
-{% extends 'base.html' %}{% from 'macros.html' import field,captcha,csrf_field,form_error with context %}
-{% block content %}<section class="centered"><div class="form-card"><span class="eyebrow">LET'S HELP YOU BACK IN</span><h1>Find your account</h1><p>Enter your username to start a secure password reset.</p>{{ form_error(errors) }}<form method="post" data-lock-seconds="{{ seconds }}">{{ csrf_field() }}{{ field('username','Username',value=data.get('username',''),maximum=256) }}{{ captcha(errors) }}<p class="lock-message" {% if not seconds %}hidden{% endif %}>Please wait <strong data-lock-count>{{ seconds }}</strong> seconds.</p><button class="wide" type="submit" data-lock-control {% if seconds %}disabled{% endif %}>Continue</button></form><a class="forgot-link" href="{{ url_for('web.login') }}">Back to Log-in</a></div></section>{% endblock %}
+{% extends 'base.html' %}
+{% from 'macros.html' import field, captcha, csrf_field, form_error with context %}
+
+{% block scripts %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/public-pages.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="recovery-layout">
+  <div class="form-card">
+    <span class="eyebrow">LET'S HELP YOU BACK IN</span>
+    <h1>Find your account</h1>
+    <p>Enter your username to start a secure password reset.</p>
+
+    {{ form_error(errors) }}
+
+    <form method="post" data-lock-seconds="{{ seconds }}">
+      {{ csrf_field() }}
+      {{ field('username', 'Username', value=data.get('username', ''), maximum=256) }}
+      {{ captcha(errors) }}
+
+      <p class="lock-message" role="status" {% if not seconds %}hidden{% endif %}>
+        Please wait <strong data-lock-count>{{ seconds }}</strong> seconds.
+      </p>
+
+      <button class="wide" type="submit" data-lock-control {% if seconds %}disabled{% endif %}>
+        Continue
+      </button>
+    </form>
+
+    <a class="forgot-link" href="{{ url_for('web.login') }}">Back to Log-in</a>
+  </div>
+</section>
+{% endblock %}

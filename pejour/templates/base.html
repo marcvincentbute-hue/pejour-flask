@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"{% if user and user.profile.get('theme') == 'dark' %} data-theme="dark"{% endif %}>
+<html lang="en" class="pejour-layout"{% if user %} data-journal-size="{{ user.profile.get('journal_text_size', 'default') }}"{% if user.profile.get('theme') != 'light' %} data-theme="dark"{% endif %}{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,9 +11,7 @@
   <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
 
   {% block scripts %}{% endblock %}
-  {% if request.endpoint != 'web.dashboard' %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-layout.css') }}">
-  {% endif %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/journal-layout.css') }}">
 </head>
 
 <body {% if user %}data-authenticated="true" data-idle-seconds="{{ idle_seconds }}"{% endif %}>
@@ -108,15 +106,16 @@
 
       {% if user %}
         <nav class="mobile-nav" aria-label="Journal navigation">
-          <a href="{{ url_for('web.account_page') }}">Overview</a>
-          <a href="{{ url_for('web.journal') }}">My journal</a>
-          <a href="{{ url_for('web.journal_edit') }}">Write an entry</a>
-
-          {% if user.role == 'admin' %}
-            <a href="{{ url_for('web.dashboard') }}">Security monitor</a>
-          {% endif %}
-
-          {{ account_menus(user) }}
+          {% for endpoint, label in [('web.account_page','Overview'), ('web.journal','My journal'), ('web.journal_edit','Write')] %}
+            <a href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="page"{% endif %}>{{ label }}</a>
+          {% endfor %}
+          <details class="mobile-more">
+            <summary>More</summary>
+            <div>
+              {{ account_menus(user) }}
+              {% if user.role == 'admin' %}<a href="{{ url_for('web.dashboard') }}">Security monitor</a>{% endif %}
+            </div>
+          </details>
         </nav>
       {% endif %}
 
